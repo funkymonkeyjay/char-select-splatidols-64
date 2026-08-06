@@ -19,8 +19,8 @@
 ## DISCLAIMER
 Each one of these features can be used independently from each other, meaning that, if you want to use a single specific feature of the mod (*CS*, *PET*, or *Music Pack*), then simply disable either one or both of these required mods:
 
-* [Character Select (Allows **Now or Never Seven**) | @Squishy6094](https://mods.sm64coopdx.com/mods/character-select.149/)
-* [WiddlePets (Allows **Smallfry**) | @wibblus](https://mods.sm64coopdx.com/mods/widdlepets.209/)
+* [**Character Select** (Allows **Now or Never Seven**) | @Squishy6094](https://mods.sm64coopdx.com/mods/character-select.149/)
+* [**WiddlePets** (Allows **Smallfry**) | @wibblus](https://mods.sm64coopdx.com/mods/widdlepets.209/)
 
 This mod will only work properly if you have the latest version of Character Select *(v1.16 onwards, preferably v1.16.3)* + the current version of SM64 Co-op DX *(v1.4 onwards, preferably v1.4.1)*.
 
