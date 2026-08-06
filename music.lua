@@ -55,7 +55,7 @@ local function splatIdolsOnwardToggleChat()
 	if splatIdolsOldStarCond then
 		djui_chat_message_create("\\#FF00A0\\Agent 1\\#FFFFFF\\: Going with \\#FF8000\\Team Past\\#FFFFFF\\? Good choice!\n\\#50FF00\\Agent 2\\#FFFFFF\\: Can't go wrong with that.\n(\"\\#FF8000\\Onward! (2015)\\#FFFFFF\\\" will now play on Star collect.)")
 	else
-		djui_chat_message_create("\\#50FF00\\Agent 2\\#FFFFFF\\: So...\\#FF8000\\Team Future\\#FFFFFF\\, huh?\n\\#FFFF00\\Frye\\#FFFFFF\\: Ooh, count me in!\n\\#50FF00\\Agent 2\\#FFFFFF\\: ?!\n(\"\\#FF8000\\Onward! (64MIX)\\#FFFFFF\\\" will now play on Star collect.)")
+		djui_chat_message_create("\\#50FF00\\Agent 2\\#FFFFFF\\: So...\\#FF8000\\Team Future\\#FFFFFF\\, huh?\n\\#FFFF00\\Frye\\#FFFFFF\\: Ooh, count me in!\n\\#50FF00\\Agent 2\\#FFFFFF\\: ?!\n(\"\\#FF8000\\Onward! (N64)\\#FFFFFF\\\" will now play on Star collect.)")
 	end
 	mod_storage_save_bool(oldStarConfigName, splatIdolsOldStarCond)
 	return true
@@ -85,7 +85,7 @@ hook_chat_command("splat-status", "- View current config status for " .. MOD_NAM
 hook_event(HOOK_UPDATE, function ()
 	if statusFrameCount < 6 then statusFrameCount = statusFrameCount + 1 end
 	if statusFrameCount == 5 then
-		local baseText = "~ SPLA\\#7DFF32\\T\\#D9D9D9\\IDOL\\#7DFF32\\S \\#FF4CBD\\64\\#ffffff\\ ~\n\nCustom Music - [ \\#FF8000\\" .. (splatIdolsMusicCond and "ON" or "OFF") .. "\\#FFFFFF\\ ]\nStar Theme - [ \\#FF8000\\Onward! " .. (splatIdolsOldStarCond and "(2015)" or "(64MIX)") .. "\\#FFFFFF\\ ]"
+		local baseText = "~ SPLA\\#7DFF32\\T\\#D9D9D9\\IDOL\\#7DFF32\\S \\#FF4CBD\\64\\#ffffff\\ ~\n\nCustom Music - [ \\#FF8000\\" .. (splatIdolsMusicCond and "ON" or "OFF") .. "\\#FFFFFF\\ ]\nStar Theme - [ \\#FF8000\\Onward! " .. (splatIdolsOldStarCond and "(2015)" or "(N64)") .. "\\#FFFFFF\\ ]"
 		local charOnlyText = "\nBeats For All - [ \\#FF8000\\" .. (splatIdolsOnlyIdolsCond and "OFF" or "ON") .. "\\#FFFFFF\\ ]"
 		djui_popup_create(baseText .. (HAS_CHAR_SELECT and charOnlyText or ""), HAS_CHAR_SELECT and 5 or 4)
 	end
@@ -110,7 +110,7 @@ local musicList = {
 
 local cusMusic = {
 	audio_stream_load("abc_calamari_inkantation_64.ogg"), -- Calamari Inkantation 64MIX
-	audio_stream_load("abc_star_collect.ogg"), -- Star Collect 64MIX
+	audio_stream_load("abc_star_collect.ogg"), -- Onward! (N64)
 	audio_stream_load("abc_star_collect_old.ogg"), -- Star Collect (Onwards! - Splatoon)
 	audio_stream_load("abc_key_ss.ogg"), -- Key Collect (Splatfest Results - Splatoon)
 	audio_stream_load("abc_key_oth.ogg"), -- Key Collect (Splatfest Results - Splatoon 2)
