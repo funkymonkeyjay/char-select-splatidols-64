@@ -6,6 +6,7 @@
   * *Callie, Marie, Pearl, Marina, Shiver, Frye, & Big Man* are included, all recolorable!
   * Costumes based on *Agents 1 & 2*, *Octo Expansion*, and **Raiders**, including an extra *Hypnoshade* costume for Callie!
   * Swim forms, with an added replica of **Super Mario Sunshine**'s diving move as a moveset option for swimming like a Squid!
+  * An overhaul on the game's HUD to match the *Splatoon* style.
   * Compatibility with the [*"So Retro!"*](https://mods.sm64coopdx.com/mods/so-retro.666/) mod.
 * **[PET] Smallfry Salmonid**
   * All **Splatoon 3** hairstyles are included as alts.
@@ -28,5 +29,6 @@ This mod will only work properly if you have the latest version of Character Sel
 * **Wasarety** — Raiders Model Recreations (Reference)
 * **VentiVR** — Assisting with extracting the Raiders models to a workable format + Raiders Big Man Ref.
 * **Centrixe the Dodo, Random Talking Bush, SuperDaStar, Kairamen (Models/Sounds Resource)** — Splatoon Models/Sounds (Reference)
+* **Random Talking Bush** — Super Mario Maker Callie/Marie Costume Sprites
 * **Morishiko** — Help with Squid/Octo Swim Form Model
 * **Church of Kondo** — Remastered *"Powerful Mario"* and *"Metallic Mario"* themes used in custom Cap themes

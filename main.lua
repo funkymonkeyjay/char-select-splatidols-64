@@ -1037,7 +1037,7 @@ if _G.charSelectExists then
 		local modelId = _G.charSelect.character_get_current_number(0)
 		
 		if not (modelId == callieCharID or modelId == marieCharID or modelId == pearlCharID or modelId == marinaCharID or modelId == shiverCharID or modelId == fryeCharID or modelId == bigmanCharID) then return end
-		if _G.charSelect.get_options_status(8) == 0 or hud_is_hidden() or (hud_get_value(HUD_DISPLAY_FLAGS) & HUD_DISPLAY_FLAG_LIVES) == 0 or gHudDisplay.flags == HUD_DISPLAY_NONE then return end
+		if _G.charSelect.get_options_status(_G.charSelect.optionTableRef.localVisuals) == 0 or hud_is_hidden() or (hud_get_value(HUD_DISPLAY_FLAGS) & HUD_DISPLAY_FLAG_LIVES) == 0 or gHudDisplay.flags == HUD_DISPLAY_NONE then return end
 		
 		local scale, x, y = djui_hud_get_screen_height() / 240, 22, 15
 		local inkType = (modelId == callieCharID or modelId == marieCharID or modelId == marinaCharID or modelId == bigmanCharID) and CAP or (modelId == pearlCharID and EMBLEM) or HAIR
