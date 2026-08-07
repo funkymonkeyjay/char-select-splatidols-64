@@ -29,6 +29,6 @@ This mod will only work properly if you have the latest version of Character Sel
 * **Wasarety** — Raiders Model Recreations (Reference)
 * **VentiVR** — Assisting with extracting the Raiders models to a workable format + Raiders Big Man Ref.
 * **Centrixe the Dodo, Random Talking Bush, SuperDaStar, Kairamen (Models/Sounds Resource)** — Splatoon Models/Sounds (Reference)
-* **Random Talking Bush** — Super Mario Maker Callie/Marie Costume Sprites
+* **Random Talking Bush** — Squid Sisters Costume Sprites (Super Mario Maker)
 * **Morishiko** — Help with Squid/Octo Swim Form Model
 * **Church of Kondo** — Remastered *"Powerful Mario"* and *"Metallic Mario"* themes used in custom Cap themes
