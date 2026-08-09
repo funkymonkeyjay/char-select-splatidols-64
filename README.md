@@ -10,7 +10,7 @@
 Each feature in this mod can be used independently from each other, meaning that, if you want to use a single specific feature of the mod (*CS*, *PET*, or *Music Pack*), then simply disable either one or both of these required mods:
 
 * [**Character Select**](https://mods.sm64coopdx.com/mods/character-select.149/) (For **[CS] Now or Never Seven**) | @Squishy6094
-* [**WiddlePets**](https://mods.sm64coopdx.com/mods/widdlepets.209/) (For **[PET] Smallfry**) | @wibblus
+* [**WiddlePets**](https://mods.sm64coopdx.com/mods/widdlepets.209/) (For **[PET] Smallfry Salmonid**) | @wibblus
 
 This mod will only work properly if you have the latest version of Character Select *(v1.16 onwards, preferably v1.16.3)* + the current version of SM64 Co-op DX *(v1.4 onwards, preferably v1.4.1)*.
 
@@ -45,7 +45,7 @@ Want to know a neat trick for getting custom "team" colors on your idol without 
 * **Morishiko** — Help with Squid/Octo Swim Form Model
 * **Centrixe the Dodo, Random Talking Bush, SuperDaStar, Kairamen (Models/Sounds Resource)** — Splatoon Models/Sounds [1]
 * **Random Talking Bush** — Squid Sisters Sprites (Super Mario Maker)
-* **Church of Kondo** — Remastered *"Powerful Mario"* and *"Metallic Mario"*
+* **Church of Kondo** — Remastered *"Powerful Mario"*, *"Metallic Mario"*
 * **Anonymous (VGMusic)** — "Calamari Inkantation" MIDI
 * **JadeStuff** — "Spicy Calamari Inkantation" MIDI
 * **Kedgy** — "Test Passed!" MIDI
