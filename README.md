@@ -30,7 +30,7 @@ This mod will only work properly if you have the latest version of Character Sel
   * Unique songs for *Caps/Keys* for **[CS] Now or Never Seven**.
   * Options for toggling *Custom Music* **[ON/OFF]**, **[ON]** by default.
 
-## SPECIAL TEAM COLORS TUTORIAL
+## TUTORIAL — TEAM COLORS 
 Want to know a neat trick for getting custom team colors on your idol without having to recreate the entire palette?
 * Select *"Save Active Palette as Preset"* in the Player options menu.
 * Give it a preset name of your own.
