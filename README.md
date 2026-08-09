@@ -20,7 +20,7 @@ This mod will only work properly if you have the latest version of Character Sel
   * Costumes based on *Agents 1 & 2*, *Octo Expansion*, and **Raiders**, including an extra *Hypnoshade* costume for Callie!
   * Swim forms, with an added replica of **Super Mario Sunshine**'s diving move as a moveset option for swimming like a Squid!
   * An overhaul on the game's HUD to match the *Splatoon* style.
-  * Compatibility with the *"[So Retro!](https://mods.sm64coopdx.com/mods/so-retro.666/)"* mod, including an accurate color palette option!
+  * Compatibility with the *"[So Retro!](https://mods.sm64coopdx.com/mods/so-retro.666/)"* mod, including a hardware-accurate color palette option!
 * **[PET] Smallfry Salmonid**
   * All **Splatoon 3** hairstyles are included as alts.
 * **SplatIdols 64 Music Pack**
@@ -36,7 +36,7 @@ Want to know a neat trick for getting custom "team" colors on your idol without 
 * Give it a preset name of your own.
 * In *"Edit Palette"*, edit colors as you please.
 * Once done, select *"Save Preset"*.
-* Boom, now you've got your own colors!
+* Boom, now you've got your own team colors!
 
 ## SPECIAL THANKS / CREDITS
 * **VioletSM64** — Help with Custom Idle Animation Transitions
