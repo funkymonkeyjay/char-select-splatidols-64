@@ -114,12 +114,6 @@ end
 
 function math.clamp(n, low, high) return math.min(math.max(n, low), high) end
 
-function lerpAngle_JJJ(a, b, t)
-	local aConvert, bConvert = sm64_to_radians(a), sm64_to_radians(b)
-    local delta = (bConvert - aConvert + math.pi) % (2 * math.pi) - math.pi
-    return radians_to_sm64((aConvert + delta * t) % (2 * math.pi))
-end
-
 function splatIdolTentacle_JJJ(node, matStackIndex)
 	local m = geo_get_mario_state()
 	local upperTentacle = cast_graph_node(node.next)
@@ -1048,4 +1042,12 @@ if _G.charSelectExists then
 		djui_hud_set_color(255, 255, 255, 255)
 		_G.charSelect.character_render_life_icon(0, x * scale, y * scale, scale)
 	end)
+	
+	-- Credits, specific to "[CS] Now or Never Seven"
+	local MOD_NAME = "SplatIdols 64"
+	_G.charSelect.credit_add(MOD_NAME, "VioletSM64", "Idle Trans. Help")
+	_G.charSelect.credit_add(MOD_NAME, "Wasarety", "Raiders Models Ref.")
+	_G.charSelect.credit_add(MOD_NAME, "VentiVR", "Raiders Models Help")
+	_G.charSelect.credit_add(MOD_NAME, "Morishiko", "Swim Form Model Help")
+	_G.charSelect.credit_add(MOD_NAME, "Inkipedia", "Splatoon Assets")
 end
