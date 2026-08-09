@@ -52,4 +52,5 @@ Want to know a neat trick for getting custom "team" colors on your idol without 
 * **Adie-moi** — "Onward!" MIDI
 * **sillymxowmeow** — Color Pulse (Vocals Only)
 * **Inkipedia, the Splatoon wiki** — Various Splatoon Artwork Assets, Renders & Information
+
 *[1] Used as reference.*
