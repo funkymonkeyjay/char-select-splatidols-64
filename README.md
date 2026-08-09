@@ -26,7 +26,7 @@ This mod will only work properly if you have the latest version of Character Sel
   * Options for toggling *Custom Music* **[ON/OFF]**, **[ON]** by default.
 
 ## SPECIAL "TEAM" COLORS TUTORIAL
-**Want to know a neat trick for getting custom "team" colors on your idol without having to recreate the entire palette?**
+Want to know a neat trick for getting custom "team" colors on your idol without having to recreate the entire palette?
 * Select *"Save Active Palette as Preset"* in the Player options menu.
 * Give it a preset name of your own.
 * In *"Edit Palette"*, edit colors as you please.
