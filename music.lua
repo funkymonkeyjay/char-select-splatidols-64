@@ -21,8 +21,9 @@ else
 	mod_storage_save_bool(oldStarConfigName, false)
 end
 
+local onlyIdolsConfigName
 if HAS_CHAR_SELECT then
-	local onlyIdolsConfigName = "splatIdolsOnlyIdolsCond_JJJ" -- Do the custom songs only play for the Now or Never Seven?
+	onlyIdolsConfigName = "splatIdolsOnlyIdolsCond_JJJ" -- Do the custom songs only play for the Now or Never Seven?
 	if mod_storage_exists(onlyIdolsConfigName) then
 		splatIdolsOnlyIdolsCond = mod_storage_load_bool(onlyIdolsConfigName)
 	else
