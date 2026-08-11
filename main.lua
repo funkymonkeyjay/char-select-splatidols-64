@@ -528,7 +528,7 @@ if _G.charSelectExists then
 			canFallEmote = false
 		end
 		
-		if canFallEmote then
+		if canFallEmote and not trailerFaceEdit then -- "trailerFaceEdit" was meant for the mod's trailer, it doesn't serve much purpose outside it.
 			-- Long fall faces, inspired by those obnoxious SM64 CoopDX character showcase videos with AI slop thumbnails.
 			if (m.vel.y < 0 and (m.pos.y ~= m.floorHeight and (m.action & ACT_FLAG_INVULNERABLE) == 0 and (m.action & ACT_FLAG_SWIMMING) == 0 and m.action ~= ACT_TWIRLING and m.action ~= ACT_FLYING) and (m.peakHeight - m.pos.y) > 1150) or m.action == ACT_BUBBLED then
 				m.marioBodyState.eyeState = m.action == ACT_BUBBLED and (modelID == bigmanCharID and 11 or MARIO_EYES_HALF_CLOSED) or 9
