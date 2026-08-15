@@ -20,7 +20,7 @@ This mod will only work properly if you have the latest version of Character Sel
   * Costumes based on *Agents 1 & 2*, *Octo Expansion*, and **Raiders**, including an extra *Hypnoshade* costume for Callie!
   * Swim forms, with an added replica of **Super Mario Sunshine**'s diving move as a moveset option for swimming like a Squid!
   * An overhaul on the game's HUD to match the *Splatoon* style.
-  * Compatibility with the *"[So Retro! (EmilyEmmi)](https://mods.sm64coopdx.com/mods/so-retro.666/)"* mod, including a hardware-accurate color palette option!
+  * Compatibility with the *[So Retro!](https://mods.sm64coopdx.com/mods/so-retro.666/)* (by @EmilyEmmi) mod, including a hardware-accurate color palette option!
 * **[PET] Smallfry Salmonid**
   * All **Splatoon 3** hairstyles are included as alts.
 * **SplatIdols 64 Music Pack**
