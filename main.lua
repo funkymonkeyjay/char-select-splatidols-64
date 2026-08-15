@@ -48,22 +48,6 @@ if incompatibilityCond then return end
 
 local savedHealth = 0
 
-function splatIdolWeapon_JJJ(node, matStackIndex)
-	local asSwitchNode = cast_graph_node(node)
-	local m = geo_get_mario_state()
-	local toNode = 0
-	if m.action == ACT_WEAPON_SPLATIDOLS_JJJ then
-		--toNode = m.actionArg + 1
-		--toNode = gPlayerSyncTable[m.playerIndex].splatIdolWeaponState_JJJ
-		if asSwitchNode.parameter == 1 then
-			toNode = m.actionArg + 1
-		else
-			toNode = 1
-		end
-	end
-	asSwitchNode.selectedCase = toNode
-end
-
 function splatIdolMouth_JJJ(node, matStackIndex)
 	local asSwitchNode = cast_graph_node(node)
 	local m = geo_get_mario_state()
@@ -77,8 +61,6 @@ function splatIdolEyebrow_JJJ(node, matStackIndex)
 end
 
 for i = 0, (MAX_PLAYERS - 1) do
-	gPlayerSyncTable[i].splatIdolExtra_JJJ = 0
-	gPlayerSyncTable[i].canMoveAir = true
 	gPlayerSyncTable[i].splatIdolTentacle_JJJ = {}
 	for j = 1, 3 do
 		gPlayerSyncTable[i].splatIdolTentacle_JJJ[j] = {}
@@ -335,12 +317,6 @@ if _G.charSelectExists then
 			
 			-- For Hypno-Callie, meant to randomize the glasses animation
 			if not _G.charSelect.is_menu_open() then gPlayerSyncTable[m.playerIndex].splatIdolGlassesState_JJJ = math.floor(random_float() * 2.99) end
-		
-			if m.action == ACT_WEAPON_SPLATIDOLS_JJJ then
-				gPlayerSyncTable[idx].canMoveAir = true
-				m.marioBodyState.allowPartRotation = 0
-				m.faceAngle.y = m.marioObj.header.gfx.angle.y
-			end
 			
 			-- Sunshine Dive!
 			local restrictedMoves = _G.charSelect.are_movesets_restricted() or _G.charSelect.get_options_status(6) == 0
@@ -528,7 +504,7 @@ if _G.charSelectExists then
 			canFallEmote = false
 		end
 		
-		if canFallEmote and not trailerFaceEdit then -- "trailerFaceEdit" was meant for the mod's trailer, it doesn't serve much purpose outside it.
+		if canFallEmote and not gPlayerSyncTable[m.playerIndex].trailerFaceEdit then -- "trailerFaceEdit" was meant for the mod's trailer, it doesn't serve much purpose outside it.
 			-- Long fall faces, inspired by those obnoxious SM64 CoopDX character showcase videos with AI slop thumbnails.
 			if (m.vel.y < 0 and (m.pos.y ~= m.floorHeight and (m.action & ACT_FLAG_INVULNERABLE) == 0 and (m.action & ACT_FLAG_SWIMMING) == 0 and m.action ~= ACT_TWIRLING and m.action ~= ACT_FLYING) and (m.peakHeight - m.pos.y) > 1150) or m.action == ACT_BUBBLED then
 				m.marioBodyState.eyeState = m.action == ACT_BUBBLED and (modelID == bigmanCharID and 11 or MARIO_EYES_HALF_CLOSED) or 9
