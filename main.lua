@@ -289,6 +289,7 @@ if _G.charSelectExists then
 	E_MODEL_INK_EMBLEM = smlua_model_util_get_id("ink_emblem_geo")
 
 	local function spawnInkParticles(m, inkType, partScale, velY)
+		if m.playerIndex ~= 0 then return end
 		local scale = partScale or 0
 		local ink = (inkType == 1 and E_MODEL_INK_CAP) or (inkType == 2 and E_MODEL_INK_EMBLEM) or E_MODEL_INK_HAIR
 		for i = 1, 2 + scale do
@@ -555,6 +556,26 @@ if _G.charSelectExists then
 			set_anim_to_frame(m, 1)
 		end
 		
+		local oldCheck = oldAnim == CHAR_ANIM_CROUCHING or oldAnim == CHAR_ANIM_CRAWLING or oldAnim == CHAR_ANIM_STOP_CRAWLING or oldAnim == CHAR_ANIM_START_CRAWLING or oldAnim == CHAR_ANIM_START_CROUCHING or oldAnim == CHAR_ANIM_SHIVERING_WARMING_HAND or (oldAnim == CHAR_ANIM_SHIVERING and m.action == ACT_SHIVERING)
+						 or oldAnim == CHAR_ANIM_WATER_IDLE or oldAnim == CHAR_ANIM_SWIM_PART1 or oldAnim == CHAR_ANIM_SWIM_PART2 or oldAnim == CHAR_ANIM_FLUTTERKICK or oldAnim == CHAR_ANIM_WATER_ACTION_END or oldAnim == CHAR_ANIM_WATER_STAR_DANCE or oldAnim == CHAR_ANIM_RETURN_FROM_WATER_STAR_DANCE or oldAnim == CHAR_ANIM_DIVE
+
+		if modelId ~= bigmanCharID then
+			-- Swim form sounds/effects.
+			if oldCheck and not newCheck then
+				spawnInkParticles(m, inkType)
+				if currAnim == CHAR_ANIM_BACKFLIP then
+					spawnInkParticles(m, inkType, 2)
+					m.particleFlags = m.particleFlags | PARTICLE_BREATH
+					play_splatidols_sound(SPLATIDOLS_SUPERJUMP_SOUND, m.pos, 1)
+				else
+					play_splatidols_sound(SPLATIDOLS_TOKID_SOUND, m.pos, 0.625)
+				end
+			elseif newCheck and not oldCheck then
+				spawnInkParticles(m, inkType)
+				play_splatidols_sound(SPLATIDOLS_TOSQUID_SOUND, m.pos, 0.5)
+			end
+		end
+
 		if idx == 0 then
 			-- Replicating the original FOV zoom for sleeping actions.
 			local fov = get_current_fov()
@@ -570,25 +591,7 @@ if _G.charSelectExists then
 				end
 			end
 			
-			local oldCheck = oldAnim == CHAR_ANIM_CROUCHING or oldAnim == CHAR_ANIM_CRAWLING or oldAnim == CHAR_ANIM_STOP_CRAWLING or oldAnim == CHAR_ANIM_START_CRAWLING or oldAnim == CHAR_ANIM_START_CROUCHING or oldAnim == CHAR_ANIM_SHIVERING_WARMING_HAND or (oldAnim == CHAR_ANIM_SHIVERING and m.action == ACT_SHIVERING)
-							 or oldAnim == CHAR_ANIM_WATER_IDLE or oldAnim == CHAR_ANIM_SWIM_PART1 or oldAnim == CHAR_ANIM_SWIM_PART2 or oldAnim == CHAR_ANIM_FLUTTERKICK or oldAnim == CHAR_ANIM_WATER_ACTION_END or oldAnim == CHAR_ANIM_WATER_STAR_DANCE or oldAnim == CHAR_ANIM_RETURN_FROM_WATER_STAR_DANCE or oldAnim == CHAR_ANIM_DIVE
-			
-			if modelId ~= bigmanCharID then
-				-- Swim form sounds/effects.
-				if oldCheck and not newCheck then
-					spawnInkParticles(m, inkType)
-					if currAnim == CHAR_ANIM_BACKFLIP then
-						spawnInkParticles(m, inkType, 2)
-						m.particleFlags = m.particleFlags | PARTICLE_BREATH
-						play_splatidols_sound(SPLATIDOLS_SUPERJUMP_SOUND, m.pos, 1)
-					else
-						play_splatidols_sound(SPLATIDOLS_TOKID_SOUND, m.pos, 0.625)
-					end
-				elseif newCheck and not oldCheck then
-					spawnInkParticles(m, inkType)
-					play_splatidols_sound(SPLATIDOLS_TOSQUID_SOUND, m.pos, 0.5)
-				end
-			else
+			if modelId == bigmanCharID then
 				-- I don't think it'd make sense for a sea creature to run out of air... in water!
 				if (m.action & ACT_FLAG_SWIMMING) ~= 0 and m.health <= savedHealth and not (currAnim == MARIO_ANIM_WATER_FORWARD_KB or currAnim == MARIO_ANIM_BACKWARDS_WATER_KB) then
 					m.health = savedHealth
@@ -596,7 +599,6 @@ if _G.charSelectExists then
 					savedHealth = m.health
 				end
 			end
-			
 			oldAnim = 0
 		end
     end)
