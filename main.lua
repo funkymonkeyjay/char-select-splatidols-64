@@ -348,7 +348,6 @@ if _G.charSelectExists then
 			-- New Yawning Action!
 			if incomingAction == ACT_START_SLEEPING then return ACT_YAWN_SPLATIDOLS_JJJ end
 		end
-		return incomingAction
 	end)
 	
 	local stepCounts = {}
