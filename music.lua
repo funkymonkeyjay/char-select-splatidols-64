@@ -199,8 +199,7 @@ hook_event(HOOK_ON_SEQ_LOAD, function (p, seq)
 				return
 			end
 			
-			-- "Better Coins" compatibility for giggles!
-			local betterCoinsCheck = _G.betterCoins and ((m.flags & MARIO_WING_CAP) ~= 0 and (m.flags & MARIO_VANISH_CAP) ~= 0 and (m.flags & MARIO_METAL_CAP) ~= 0)
+			local betterCoinsCheck = _G.betterCoins and ((m.flags & MARIO_WING_CAP) ~= 0 and (m.flags & MARIO_VANISH_CAP) ~= 0 and (m.flags & MARIO_METAL_CAP) ~= 0) -- "Better Coins" compatibility for giggles!
 			if (cusMusIndex == 1 and n.currLevelNum == LEVEL_BOWSER_3) -- Play "Calamari Inkantation 64MIX" only during Final Bowser.
 			or ((cusMusIndex == 2 or cusMusIndex == 3) and (m.action & ACT_FLAG_INTANGIBLE) == 0) -- Play "Onward!" only during star dance.
 			or (cusMusIndex == 6 and obj_get_first_with_behavior_id(id_bhvActSelector)) -- Play "Star Select" only during... Star Select!
@@ -265,5 +264,83 @@ hook_event(HOOK_UPDATE, function () -- function meant to handle custom streamed 
 		else
 			audio_stream_stop(currMusic)
 		end
+	end
+end)
+
+-- ** BOWSER GROOVES **
+
+hook_event(HOOK_ON_DIALOG, function(id)
+	local charCheck = true
+	if HAS_CHAR_SELECT then
+		local modelId = _G.charSelect.character_get_current_number(0)
+		if splatIdolsOnlyIdolsCond then
+			charCheck = modelId == callieCharID or modelId == marieCharID or modelId == pearlCharID or modelId == marinaCharID or modelId == shiverCharID or modelId == fryeCharID or modelId == bigmanCharID
+		end
+	end
+	
+	if id == DIALOG_093 and (splatIdolsMusicCond and charCheck) then
+		return true, "...Wha-? What happened\nto my battle beats?!\nGah--It doesn't matter,\nI'm starting to dig this\ngroovy tune...\nBut that's not enough to\nstop me, for your Stars\nare useless against me!\nAnd with this tune by my\nside...\nYou stand no chance!\nTry your best--you'll fail\nanyway. Bwa ha ha ha!"
+	end
+end)
+
+define_custom_obj_fields({oBowserHasStoppedMusic = 'u32', oBowserGrooveAnimFrame = 'u32', oBowserDanceAnimFrame = 'u32', oBowserStopDancing = 'u32'})
+local TRUE, FALSE = 1, 0 -- It makes things easier to read.
+local BOWSER_ACT_SPLAT = 777
+hook_behavior(id_bhvBowser, OBJ_LIST_GENACTOR, false, nil, function (o)
+	local playerCount = network_player_connected_count() -- Preventive measure to avoid desyncing issues in multiplayer.
+	local charCheck = true
+	if HAS_CHAR_SELECT then
+		local modelId = _G.charSelect.character_get_current_number(0)
+		charCheck = modelId == callieCharID or modelId == marieCharID or modelId == pearlCharID or modelId == marinaCharID or modelId == shiverCharID or modelId == fryeCharID or modelId == bigmanCharID
+	end
+	
+	if not splatIdolsMusicCond or (splatIdolsOnlyIdolsCond and not charCheck) or playerCount > 1 or o.oBowserStopDancing > 0 then
+		if o.oAction == 5 and o.oBehParams2ndByte == 2 and o.oBowserGrooveAnimFrame > 78 then
+			o.oBowserEyesShut = FALSE
+		end
+		o.oBowserStopDancing = TRUE
+		return
+	end
+	
+	--local calInkTimer = audio_stream_get_position(cusMusic[1]) * 2 -- Need to wait until ModAudio overhaul PR.
+	local calInkTimer = 0
+	
+	if o.oAction == 5 and o.oBehParams2ndByte == 2 then 
+		smlua_anim_util_set_animation(o, "BOWSER_BOP")
+		o.oBowserGrooveAnimFrame = o.oBowserGrooveAnimFrame + 1
+		if o.oBowserGrooveAnimFrame > 78 then o.oBowserEyesShut = TRUE end
+		if o.oBowserGrooveAnimFrame > 155 then
+			o.oBowserGrooveAnimFrame = 108
+		end
+		o.header.gfx.animInfo.animFrame = o.oBowserGrooveAnimFrame
+	else
+		o.oBowserGrooveAnimFrame = 0
+	end
+	
+	local firstSetCheck = calInkTimer > 43.175 and calInkTimer < 45.267
+	local secondSetCheck = calInkTimer > 70.186 and calInkTimer < 72.683
+	if firstSetCheck or secondSetCheck then
+		o.oBowserDanceAnimFrame = o.oBowserDanceAnimFrame + 1
+		if o.oBowserHasStoppedMusic == FALSE and not (o.oAction == 1 or o.oAction == 2 or o.oAction == 4 or o.oAction == 5 or o.oAction == 12 or o.oAction == 13) then
+			o.oAction = BOWSER_ACT_SPLAT
+			o.oBowserHasStoppedMusic = TRUE
+		end
+	else
+		o.oBowserHasStoppedMusic = FALSE
+	end
+	
+	if o.oAction == BOWSER_ACT_SPLAT then
+		o.oBowserEyesShut = FALSE
+		o.oForwardVel = 0
+		local animationToSet = secondSetCheck and 2 or 1
+		smlua_anim_util_set_animation(o, "BOWSER_DANCE_" .. tostring(animationToSet))
+		o.header.gfx.animInfo.animFrame = o.oBowserDanceAnimFrame
+		if o.oBowserHasStoppedMusic == 0 then
+			o.oAction = 14 -- Set to "Walking" state!
+			o.oSubAction = 0
+			o.oTimer = 0
+		end
+	elseif o.oAction ~= BOWSER_ACT_SPLAT and not (firstSetCheck or secondSetCheck) then
+		o.oBowserDanceAnimFrame = 0
 	end
 end)

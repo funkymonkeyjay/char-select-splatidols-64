@@ -48,18 +48,6 @@ if incompatibilityCond then return end
 
 local savedHealth = 0
 
-function splatIdolMouth_JJJ(node, matStackIndex)
-	local asSwitchNode = cast_graph_node(node)
-	local m = geo_get_mario_state()
-	asSwitchNode.selectedCase = gPlayerSyncTable[m.playerIndex].splatIdolMouthState_JJJ
-end
-
-function splatIdolEyebrow_JJJ(node, matStackIndex)
-	local asSwitchNode = cast_graph_node(node)
-	local m = geo_get_mario_state()
-	asSwitchNode.selectedCase = gPlayerSyncTable[m.playerIndex].splatIdolEyebrowState_JJJ
-end
-
 for i = 0, (MAX_PLAYERS - 1) do
 	gPlayerSyncTable[i].splatIdolTentacle_JJJ = {}
 	for j = 1, 3 do
@@ -67,8 +55,9 @@ for i = 0, (MAX_PLAYERS - 1) do
 		gPlayerSyncTable[i].splatIdolTentacle_JJJ[j].y = 0
 		gPlayerSyncTable[i].splatIdolTentacle_JJJ[j].z = 0
 	end
-	gPlayerSyncTable[i].splatIdolMouthState_JJJ = 0
-	gPlayerSyncTable[i].splatIdolEyebrowState_JJJ = 0
+	--gPlayerSyncTable[i].splatIdolMouthState_JJJ = 0
+	--gPlayerSyncTable[i].splatIdolEyebrowState_JJJ = 0
+	gPlayerSyncTable[i].splatIdolTentacleMult_JJJ = 1
 	gPlayerSyncTable[i].splatIdolGlassesState_JJJ = math.floor(random_float() * 2.99)
 	gPlayerSyncTable[i].splatIdolOldAnim_JJJ = 0
 end
@@ -105,7 +94,8 @@ function splatIdolTentacle_JJJ(node, matStackIndex)
 	if not (m and upperTentacle and lowerTentacle and currentNode) then return end
 	
 	local parameter = currentNode.parameter + 1
-	local tentacle = gPlayerSyncTable[m.playerIndex].splatIdolTentacle_JJJ
+	local idx = m.playerIndex
+	local tentacle = gPlayerSyncTable[idx].splatIdolTentacle_JJJ
 	local paramSwitch = parameter == 1 and -1 or 1
 	local fullRotation = get_area_update_counter() * 840
 
@@ -118,27 +108,52 @@ function splatIdolTentacle_JJJ(node, matStackIndex)
 	local forceLateral = math.sqrt((velX * velX) + (velZ  * velZ))
 	local forceY = -math.clamp(velY, -1, 1)
 	
+	-- For special cases like "Character Select Nuzlocke".
+	
+	local modelId = _G.charSelect.character_get_current_number(idx)
+	local objCheck = not (modelId == callieCharID or modelId == marieCharID or modelId == pearlCharID or modelId == marinaCharID or modelId == shiverCharID or modelId == fryeCharID or modelId == bigmanCharID)
+	
+	if objCheck then
+		headRot.x, headRot.y, headRot.z = 0, 0, 0
+		velX, velY, velZ = 0, 0, 0
+		forceLateral = 0
+		forceY = 0
+	end
+	
 	local climbCond = m.action == ACT_CLIMBING_POLE or m.action == ACT_HOLDING_POLE or m.action == ACT_GRAB_POLE_SLOW
 					or m.action == ACT_GRAB_POLE_FAST or m.action == ACT_TOP_OF_POLE_TRANSITION or m.action == ACT_TOP_OF_POLE
 					or m.action == ACT_EXIT_LAND_SAVE_DIALOG
 	local movementForce = climbCond and 0 or radians_to_sm64(math.clamp(forceY + (forceLateral / 2), -1, 1))
+	local headActRotate = (not objCheck and ((m.action == ACT_READING_NPC_DIALOG or m.action == ACT_READING_AUTOMATIC_DIALOG) and m.marioBodyState.headAngle.x) or (m.action == ACT_FIRST_PERSON and m.statusForCamera.headRotation.x)) or 0
 	
-	local headActRotate = ((m.action == ACT_READING_NPC_DIALOG or m.action == ACT_READING_AUTOMATIC_DIALOG) and m.marioBodyState.headAngle.x) or (m.action == ACT_FIRST_PERSON and m.statusForCamera.headRotation.x) or 0
-	local toLerpUpper = movementForce + (parameter ~= 3 and -headRot.z or headRot.z) - headActRotate
+	if idx == 0 and parameter > 2 then
+		local target = (parameter == 3 and m.vel.y < 0) and -1 or 1
+		gPlayerSyncTable[idx].splatIdolTentacleMult_JJJ = approach_f32_symmetric(gPlayerSyncTable[idx].splatIdolTentacleMult_JJJ, target, 0.125)
+	end
+	local actualTentacleMult = parameter > 2 and gPlayerSyncTable[idx].splatIdolTentacleMult_JJJ or 1
+	local toLerpUpper = (movementForce * actualTentacleMult) + ((parameter ~= 3 and not objCheck) and -headRot.z or headRot.z) - (objCheck and 0 or headActRotate)
 	
 	upperTentacle.rotation.z = (sins(fullRotation * 2) * 750 * paramSwitch) + toLerpUpper
 	upperTentacle.rotation.y = sins(fullRotation) * 1500 * paramSwitch
 	
+	upperTentacle.rotation.x = (toLerpUpper * 0.40625) * paramSwitch
+	
 	-- *** LOWER TENTACLE ***
 	local intendedDYaw = m.intendedYaw - m.faceAngle.y
 	local toLerpLateral = (m.action == ACT_LONG_JUMP and -1 or 1) * (5461.3335 * m.intendedMag / 24 * sins(intendedDYaw))
+	if objCheck then
+		intendedDYaw = 0
+		toLerpLateral = 0
+	end
 	
 	local checkVel = math.abs(m.vel.x) > 10 or math.abs(m.vel.z) > 10 or math.abs(climbCond and 0 or m.vel.y) > 25
-	if checkVel then
-		local trueMovementForce = (m.action == ACT_BUTT_SLIDE or m.action == ACT_RIDING_SHELL_GROUND) and 0 or movementForce
-		tentacle[parameter].y, tentacle[parameter].z = approach_f32(tentacle[parameter].y, toLerpLateral, 1000, 1000), approach_f32(tentacle[parameter].z, trueMovementForce, 375, 375)
-	else
-		tentacle[parameter].y, tentacle[parameter].z = approach_f32(tentacle[parameter].y, 0, 150, 150), approach_f32(tentacle[parameter].z, 0, 150, 150)
+	if idx == 0 then
+		if checkVel then
+			local trueMovementForce = (m.action == ACT_BUTT_SLIDE or m.action == ACT_RIDING_SHELL_GROUND and m.action == ACT_LONG_JUMP) and 0 or movementForce
+			tentacle[parameter].y, tentacle[parameter].z = approach_f32(tentacle[parameter].y, toLerpLateral, 1000, 1000), approach_f32(tentacle[parameter].z, trueMovementForce, 375, 375)
+		else
+			tentacle[parameter].y, tentacle[parameter].z = approach_f32(tentacle[parameter].y, 0, 150, 150), approach_f32(tentacle[parameter].z, 0, 150, 150)
+		end
 	end
 	
 	lowerTentacle.rotation.y = (-coss(fullRotation) * 2000 * paramSwitch) + ((not checkVel and sins(fullRotation * 2) or 1) * tentacle[parameter].y)
@@ -177,18 +192,46 @@ function splatIdolTail_JJJ(node, matStackIndex) -- For Big Man
 	local forceY = -math.clamp((m.pos.y ~= m.floorHeight and m.vel.y or 0) / 75, -1, 1)
 	local lerpZ = (buttAngle + (forceY * 12000) - (slope * 0.5)) - 5000
 	
-	local tail = gPlayerSyncTable[m.playerIndex].splatIdolTentacle_JJJ
+	-- For special cases like "Character Select Nuzlocke".
+	local idx = m.playerIndex
+	local modelId = _G.charSelect.character_get_current_number(idx)
+	if not (modelId == callieCharID or modelId == marieCharID or modelId == pearlCharID or modelId == marinaCharID or modelId == shiverCharID or modelId == fryeCharID or modelId == bigmanCharID) then
+		buttRot.x, buttRot.y, buttRot.z = 0, 0, 0
+		toLerpLateral = 0
+		lerpZ = -2500
+	end
+	
+	local tail = gPlayerSyncTable[idx].splatIdolTentacle_JJJ
 	tailBase.rotation.x, tailBase.rotation.z = approach_f32(tail[1].y, toLerpLateral, 250, 250), approach_f32(tail[1].z, lerpZ, 1000, 1000)
-	tail[1].y, tail[1].z = tailBase.rotation.x, tailBase.rotation.z
+	if idx == 0 then tail[1].y, tail[1].z = tailBase.rotation.x, tailBase.rotation.z end
 	
 	-- *** OTHER TAIL BITS ***
 	local middleLerpLateral = toLerpLateral ~= 0 and toLerpLateral or coss(fullRotation) * 5000
 	tailMiddle.rotation.x, tailMiddle.rotation.z = approach_f32(tail[2].y, middleLerpLateral, 500, 500), 2500 + (forceY * 3750)
-	tail[2].y = tailMiddle.rotation.x
+	if idx == 0 then tail[2].y = tailMiddle.rotation.x end
 	
 	local endlerpLateral = middleLerpLateral ~= 0 and middleLerpLateral or -coss(fullRotation * 1.25) * 10000
 	tailEnd.rotation.x, tailEnd.rotation.z = approach_f32(tail[3].y, endlerpLateral, 750, 750), 1250 + (forceY * 1875)
-	tail[3].y = tailEnd.rotation.x
+	if idx == 0 then tail[3].y = tailEnd.rotation.x end
+end
+
+function splatIdolSwim_JJJ(node, matStackIndex)
+	local switchCase = cast_graph_node(node)
+	local m = geo_get_mario_state()
+	
+	if not (switchCase or m) then return end
+	
+	local currAnim = m.marioObj.header.gfx.animInfo.animID
+	local currFrame = m.marioObj.header.gfx.animInfo.animFrame
+	if currAnim == CHAR_ANIM_CROUCHING or currAnim == CHAR_ANIM_CRAWLING or currAnim == CHAR_ANIM_STOP_CRAWLING or currAnim == CHAR_ANIM_START_CRAWLING or (currAnim == CHAR_ANIM_START_CROUCHING and is_anim_at_end(m) == 1)
+	or (currAnim == CHAR_ANIM_SHIVERING_WARMING_HAND and is_anim_at_end(m) == 1) or (currAnim == CHAR_ANIM_SHIVERING and m.action == ACT_SHIVERING)
+	or (currAnim == CHAR_ANIM_WATER_IDLE or currAnim == CHAR_ANIM_SWIM_PART1 or currAnim == CHAR_ANIM_SWIM_PART2 or currAnim == CHAR_ANIM_FLUTTERKICK
+	or currAnim == CHAR_ANIM_WATER_ACTION_END or currAnim == CHAR_ANIM_WATER_STAR_DANCE or currAnim == CHAR_ANIM_RETURN_FROM_WATER_STAR_DANCE) or currAnim == CHAR_ANIM_DIVE then
+		switchCase.selectedCase = 1
+		return
+	else
+		switchCase.selectedCase = 0
+	end
 end
 
 function splatIdolSwim_JJJ(node, matStackIndex)
@@ -220,13 +263,11 @@ function splatIdolGlasses_JJJ(node, matStackIndex) -- For Hypno-Callie.
 	
 	local gAreaUpdateCounter = math.floor(get_area_update_counter() / 2.5)
 	local currIndex = (gAreaUpdateCounter % 9) + (glassState * 9)
-	--blinkFrame = ((switchCase->numCases * 32 + gAreaUpdateCounter) >> 1) & 0x1F;
+	
 	switchCase.selectedCase = currIndex
 end
 
 -- ** INITIALIZATION **
-
-local function run_func_or_get_var(x, ...) if type(x) == "function" then return x(...) else return x end end
 
 if _G.charSelectExists then
 	local SPLATIDOLS_TOKID_SOUND =       audio_sample_load("TOKID.ogg")
@@ -423,6 +464,10 @@ if _G.charSelectExists then
 			end
 		end
 	end)
+	
+	local function checkForLongFall(m)
+		return (m.vel.y < 0 and (m.pos.y ~= m.floorHeight and (m.action & ACT_FLAG_INVULNERABLE) == 0 and (m.action & ACT_FLAG_SWIMMING) == 0 and m.action ~= ACT_TWIRLING and m.action ~= ACT_FLYING) and (m.peakHeight - m.pos.y) > 1150) or m.action == ACT_BUBBLED
+	end
 
 	local hasZoomed = false
 	hook_event(HOOK_MARIO_UPDATE, function (m)
@@ -506,14 +551,15 @@ if _G.charSelectExists then
 		
 		if canFallEmote and not gPlayerSyncTable[m.playerIndex].trailerFaceEdit then -- "trailerFaceEdit" was meant for the mod's trailer, it doesn't serve much purpose outside it.
 			-- Long fall faces, inspired by those obnoxious SM64 CoopDX character showcase videos with AI slop thumbnails.
-			if (m.vel.y < 0 and (m.pos.y ~= m.floorHeight and (m.action & ACT_FLAG_INVULNERABLE) == 0 and (m.action & ACT_FLAG_SWIMMING) == 0 and m.action ~= ACT_TWIRLING and m.action ~= ACT_FLYING) and (m.peakHeight - m.pos.y) > 1150) or m.action == ACT_BUBBLED then
+			if checkForLongFall(m) then
 				m.marioBodyState.eyeState = m.action == ACT_BUBBLED and (modelID == bigmanCharID and 11 or MARIO_EYES_HALF_CLOSED) or 9
-				gPlayerSyncTable[idx].splatIdolMouthState_JJJ = 4
-				gPlayerSyncTable[idx].splatIdolEyebrowState_JJJ = 1
+				--gPlayerSyncTable[idx].splatIdolMouthState_JJJ = 4
+				--gPlayerSyncTable[idx].splatIdolEyebrowState_JJJ = 1
 				return
 			end
 			
-			-- Based on original "Character Select" code by Squishy, made to provide compatibility with mouth and eyebrow states.
+			--[[
+			
 			local characterAnims
 			local animIndexes = {
 				[callieCharID] = splatIdolAnims_JJJ[1], 
@@ -538,6 +584,7 @@ if _G.charSelectExists then
 			if eyebrowState then
 				gPlayerSyncTable[idx].splatIdolEyebrowState_JJJ = eyebrowState
 			end
+			--]]
 		end
 		
 		-- Keep the swim form from going into slopes visually.
@@ -878,6 +925,58 @@ if _G.charSelectExists then
 
 	_G.charSelect.character_add_menu_instrumental(bigmanCharID, audio_stream_load("abc_menu_bigman.ogg"))
 	_G.charSelect.character_add_graffiti(bigmanCharID, TEX_GRAFFITI_BIGMAN)
+	
+	-- ** MOUTH/EYEBROW GEO FUNCTIONS **
+	local animIndexes = {
+		[callieCharID] = splatIdolAnims_JJJ[1], 
+		[marieCharID] =  splatIdolAnims_JJJ[2], 
+		[pearlCharID] =  splatIdolAnims_JJJ[3], 
+		[marinaCharID] = splatIdolAnims_JJJ[4], 
+		[shiverCharID] = splatIdolAnims_JJJ[5], 
+		[fryeCharID] =   splatIdolAnims_JJJ[6], 
+		[bigmanCharID] = splatIdolAnims_JJJ[7], 
+	}
+
+	local function run_func_or_get_var(x, ...) if type(x) == "function" then return x(...) else return x end end
+
+	-- Based on original "Character Select" code by Squishy, made to provide compatibility with mouth and eyebrow states.
+	function splatIdolMouth_JJJ(node, matStackIndex)
+		local asSwitchNode = cast_graph_node(node)
+		
+		local m = geo_get_mario_state()
+		local idx = m.playerIndex
+		local modelId = _G.charSelect.character_get_current_number(idx)
+
+		local characterAnims = animIndexes[modelId]
+			
+		local animInfo = m.marioObj.header.gfx.animInfo
+		local setMouthState = 0
+		local mouthState = characterAnims and characterAnims.mouth and run_func_or_get_var(characterAnims.mouth[animInfo.animID], m, animInfo.animFrame)
+		if mouthState then
+			setMouthState = mouthState --gPlayerSyncTable[m.playerIndex].splatIdolMouthState_JJJ
+		end
+		if checkForLongFall(m) then setMouthState = 4 end
+		asSwitchNode.selectedCase = setMouthState
+	end
+
+	function splatIdolEyebrow_JJJ(node, matStackIndex)
+		local asSwitchNode = cast_graph_node(node)
+		
+		local m = geo_get_mario_state()
+		local idx = m.playerIndex
+		local modelId = _G.charSelect.character_get_current_number(idx)
+		
+		local characterAnims = animIndexes[modelId]
+
+		local animInfo = m.marioObj.header.gfx.animInfo
+		local setEyebrowState = 0
+		local eyebrowState = characterAnims and characterAnims.eyebrows and run_func_or_get_var(characterAnims.eyebrows[animInfo.animID], m, animInfo.animFrame)
+		if eyebrowState then
+			setEyebrowState = eyebrowState --gPlayerSyncTable[m.playerIndex].splatIdolEyebrowState_JJJ
+		end
+		if checkForLongFall(m) then setEyebrowState = 1 end
+		asSwitchNode.selectedCase = setEyebrowState
+	end
 	
 	-- ** HUD TEXTURES **
 	local charList = {
