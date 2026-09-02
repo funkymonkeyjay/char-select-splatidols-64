@@ -109,7 +109,6 @@ function splatIdolTentacle_JJJ(node, matStackIndex)
 	local forceY = -math.clamp(velY, -1, 1)
 	
 	-- For special cases like "Character Select Nuzlocke".
-	
 	local modelId = _G.charSelect.character_get_current_number(idx)
 	local objCheck = not (modelId == callieCharID or modelId == marieCharID or modelId == pearlCharID or modelId == marinaCharID or modelId == shiverCharID or modelId == fryeCharID or modelId == bigmanCharID)
 	
@@ -221,24 +220,9 @@ function splatIdolSwim_JJJ(node, matStackIndex)
 	
 	if not (switchCase or m) then return end
 	
-	local currAnim = m.marioObj.header.gfx.animInfo.animID
-	local currFrame = m.marioObj.header.gfx.animInfo.animFrame
-	if currAnim == CHAR_ANIM_CROUCHING or currAnim == CHAR_ANIM_CRAWLING or currAnim == CHAR_ANIM_STOP_CRAWLING or currAnim == CHAR_ANIM_START_CRAWLING or (currAnim == CHAR_ANIM_START_CROUCHING and is_anim_at_end(m) == 1)
-	or (currAnim == CHAR_ANIM_SHIVERING_WARMING_HAND and is_anim_at_end(m) == 1) or (currAnim == CHAR_ANIM_SHIVERING and m.action == ACT_SHIVERING)
-	or (currAnim == CHAR_ANIM_WATER_IDLE or currAnim == CHAR_ANIM_SWIM_PART1 or currAnim == CHAR_ANIM_SWIM_PART2 or currAnim == CHAR_ANIM_FLUTTERKICK
-	or currAnim == CHAR_ANIM_WATER_ACTION_END or currAnim == CHAR_ANIM_WATER_STAR_DANCE or currAnim == CHAR_ANIM_RETURN_FROM_WATER_STAR_DANCE) or currAnim == CHAR_ANIM_DIVE then
-		switchCase.selectedCase = 1
-		return
-	else
-		switchCase.selectedCase = 0
-	end
-end
-
-function splatIdolSwim_JJJ(node, matStackIndex)
-	local switchCase = cast_graph_node(node)
-	local m = geo_get_mario_state()
-	
-	if not (switchCase or m) then return end
+	local idx = m.playerIndex
+	local modelId = _G.charSelect.character_get_current_number(idx)
+	if not (modelId == callieCharID or modelId == marieCharID or modelId == pearlCharID or modelId == marinaCharID or modelId == shiverCharID or modelId == fryeCharID or modelId == bigmanCharID) then switchCase.selectedCase = 0; return end
 	
 	local currAnim = m.marioObj.header.gfx.animInfo.animID
 	local currFrame = m.marioObj.header.gfx.animInfo.animFrame
@@ -478,12 +462,6 @@ if _G.charSelectExists then
 		
 		if not (modelId == callieCharID or modelId == marieCharID or modelId == pearlCharID or modelId == marinaCharID or modelId == shiverCharID or modelId == fryeCharID or modelId == bigmanCharID) then return end
 		
-		-- In order to prevent the wrong animation being played during petting, we're going to assume the petting action is played, if so, then replace it with our own.
-		local widdlePetsCheck = _G.wpets and currAnim == MARIO_ANIM_SHIVERING and m.action ~= ACT_SHIVERING and modelId ~= bigmanCharID and not _G.charSelect.is_menu_open()
-		if widdlePetsCheck then
-			set_mario_action(m, ACT_PET_SPLATIDOLS_JJJ, 0)
-		end
-		
 		-- Force the "Right Hand Open" state during credits pose, much easier than having to assign the animation through the override table.
 		if currAnim == CHAR_ANIM_CREDITS_PEACE_SIGN and m.marioBodyState.handState == MARIO_HAND_PEACE_SIGN then
 			m.marioBodyState.handState = MARIO_HAND_RIGHT_OPEN
@@ -520,12 +498,6 @@ if _G.charSelectExists then
 			end
 		end
 		
-		-- Debug code, makes Final Bowser easy to beat. 
-		-- local nearestBowser = obj_get_nearest_object_with_behavior_id(o, id_bhvBowser)
-		-- if nearestBowser then
-			-- nearestBowser.oHealth = 1
-		-- end
-		
 		-- Making sure the Y-offset for the characters don't make them sink into the ground during Jumbo Star animation, don't use Corrective Scale, kids, that industry's a SCAM!
 		if m.action == ACT_JUMBO_STAR_CUTSCENE and m.actionArg == 1 then
 			local posValues = {
@@ -553,38 +525,8 @@ if _G.charSelectExists then
 			-- Long fall faces, inspired by those obnoxious SM64 CoopDX character showcase videos with AI slop thumbnails.
 			if checkForLongFall(m) then
 				m.marioBodyState.eyeState = m.action == ACT_BUBBLED and (modelID == bigmanCharID and 11 or MARIO_EYES_HALF_CLOSED) or 9
-				--gPlayerSyncTable[idx].splatIdolMouthState_JJJ = 4
-				--gPlayerSyncTable[idx].splatIdolEyebrowState_JJJ = 1
 				return
 			end
-			
-			--[[
-			
-			local characterAnims
-			local animIndexes = {
-				[callieCharID] = splatIdolAnims_JJJ[1], 
-				[marieCharID] =  splatIdolAnims_JJJ[2], 
-				[pearlCharID] =  splatIdolAnims_JJJ[3], 
-				[marinaCharID] = splatIdolAnims_JJJ[4], 
-				[shiverCharID] = splatIdolAnims_JJJ[5], 
-				[fryeCharID] =   splatIdolAnims_JJJ[6], 
-				[bigmanCharID] = splatIdolAnims_JJJ[7], 
-			}
-			characterAnims = animIndexes[modelId]
-			
-			local animInfo = m.marioObj.header.gfx.animInfo
-			
-			gPlayerSyncTable[idx].splatIdolMouthState_JJJ = 0
-			local mouthState = characterAnims.mouth and run_func_or_get_var(characterAnims.mouth[animInfo.animID], m, animInfo.animFrame)
-			if mouthState then
-				gPlayerSyncTable[idx].splatIdolMouthState_JJJ = mouthState
-			end
-			gPlayerSyncTable[idx].splatIdolEyebrowState_JJJ = 0
-			local eyebrowState = characterAnims.eyebrows and run_func_or_get_var(characterAnims.eyebrows[animInfo.animID], m, animInfo.animFrame)
-			if eyebrowState then
-				gPlayerSyncTable[idx].splatIdolEyebrowState_JJJ = eyebrowState
-			end
-			--]]
 		end
 		
 		-- Keep the swim form from going into slopes visually.

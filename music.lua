@@ -279,7 +279,7 @@ hook_event(HOOK_ON_DIALOG, function(id)
 	end
 	
 	if id == DIALOG_093 and (splatIdolsMusicCond and charCheck) then
-		return true, "...Wha-? What happened\nto my battle beats?!\nGah--It doesn't matter,\nI'm starting to dig this\ngroovy tune...\nBut that's not enough to\nstop me, for your Stars\nare useless against me!\nAnd with this tune by my\nside...\nYou stand no chance!\nTry your best--you'll fail\nanyway. Bwa ha ha ha!"
+		return true, "...Wha-? What happened\nto my battle beats?!\nGah--It doesn't matter,\nI'm starting to dig this\ngroovy tune...\nBut that's not enough to\nstop me, for your Stars\nare useless against me!\nAnd with this song by my\nside...\nYou stand no chance!\nTry your best--you'll fail\nanyway. Bwa ha ha ha!"
 	end
 end)
 
