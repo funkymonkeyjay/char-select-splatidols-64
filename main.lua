@@ -345,7 +345,7 @@ if _G.charSelectExists then
 			if not _G.charSelect.is_menu_open() then gPlayerSyncTable[m.playerIndex].splatIdolGlassesState_JJJ = math.floor(random_float() * 2.99) end
 			
 			-- Sunshine Dive!
-			local restrictedMoves = _G.charSelect.are_movesets_restricted() or _G.charSelect.get_options_status(6) == 0
+			local restrictedMoves = _G.charSelect.are_movesets_restricted() or _G.charSelect.get_options_status(_G.charSelect.optionTableRef.localMoveset) == 0
 			if not restrictedMoves and incomingAction == ACT_FORWARD_ROLLOUT and m.action == ACT_DIVE_SLIDE and (m.input & INPUT_A_PRESSED) == 0 and find_floor_slope(m, 0) < 5000 then
 				local forwardVel = m.forwardVel + 15
 				if forwardVel > 48 then
@@ -427,7 +427,7 @@ if _G.charSelectExists then
 		local modelId = _G.charSelect.character_get_current_number(idx)
 		gPlayerSyncTable[idx].splatIdolOldAnim_JJJ = m.marioObj.header.gfx.animInfo.animID
 		if (modelId == callieCharID or modelId == marieCharID or modelId == pearlCharID or modelId == marinaCharID or modelId == shiverCharID or modelId == fryeCharID or modelId == bigmanCharID) then
-			local restrictedMoves = _G.charSelect.are_movesets_restricted() or _G.charSelect.get_options_status(6) == 0
+			local restrictedMoves = _G.charSelect.are_movesets_restricted() or _G.charSelect.get_options_status(_G.charSelect.optionTableRef.localMoveset) == 0
 			if not restrictedMoves and (m.action == ACT_PUNCHING or m.action == ACT_MOVE_PUNCHING) then
 				if m.actionArg == 6 then
 					m.actionArg = 0
