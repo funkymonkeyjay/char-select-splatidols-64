@@ -6,6 +6,8 @@
 |---|---|
 | ![Screenshot #3](/SplatIdols_3.png) | ![Screenshot #4](/SplatIdols_4.png) |
 
+Public files for **Blender** are included in the *.blend* folder of this repository, perfect for creating custom costumes!
+
 ## DISCLAIMER
 Each feature in this mod can be used independently from each other, meaning that, if you want to use a single specific feature of the mod (*CS*, *PET*, or *Music Pack*), then simply disable either one or both of these required mods:
 
