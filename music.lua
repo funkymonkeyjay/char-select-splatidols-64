@@ -302,8 +302,7 @@ hook_behavior(id_bhvBowser, OBJ_LIST_GENACTOR, false, nil, function (o)
 		return
 	end
 	
-	--local calInkTimer = audio_stream_get_position(cusMusic[1]) * 2 -- Need to wait until ModAudio overhaul PR.
-	local calInkTimer = 0
+	local calInkTimer = cusMusic[1].position * 1.9987402854998019983893239002562 -- Props to Coolio for notifying me of the position variable in the ModAudio struct, although I did have to multiply it just to get the exact time in seconds.
 	
 	if o.oAction == 5 and o.oBehParams2ndByte == 2 then 
 		smlua_anim_util_set_animation(o, "BOWSER_BOP")
@@ -321,7 +320,7 @@ hook_behavior(id_bhvBowser, OBJ_LIST_GENACTOR, false, nil, function (o)
 	local secondSetCheck = calInkTimer > 70.186 and calInkTimer < 72.683
 	if firstSetCheck or secondSetCheck then
 		o.oBowserDanceAnimFrame = o.oBowserDanceAnimFrame + 1
-		if o.oBowserHasStoppedMusic == FALSE and not (o.oAction == 1 or o.oAction == 2 or o.oAction == 4 or o.oAction == 5 or o.oAction == 12 or o.oAction == 13) then
+		if o.oBowserHasStoppedMusic == FALSE and not (o.oAction == 1 or o.oAction == 2 or o.oAction == 4 or o.oAction == 5 or o.oAction == 12 or o.oAction == 13) and (o.oVelY >= 0 and o.oVelY < 2 and o.oHealth > 0) then
 			o.oAction = BOWSER_ACT_SPLAT
 			o.oBowserHasStoppedMusic = TRUE
 		end

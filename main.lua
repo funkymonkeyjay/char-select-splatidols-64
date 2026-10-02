@@ -385,7 +385,8 @@ if _G.charSelectExists then
 			local charCond = modelId == callieCharID or modelId == marieCharID or modelId == pearlCharID or modelId == marinaCharID or modelId == shiverCharID or modelId == fryeCharID or modelId == bigmanCharID
 			local checkPos = pos.x == m.marioObj.header.gfx.cameraToObject.x and pos.y == m.marioObj.header.gfx.cameraToObject.y and pos.z == m.marioObj.header.gfx.cameraToObject.z -- Shoutouts to "EmilyEmmi" for giving me advice on how to accomplish step sounds!
 
-			if charCond and checkPos then
+			if checkPos and charCond then
+				
 				local allowedSoundBits = {
 					SOUND_TERRAIN_DEFAULT << 16, 
 					SOUND_TERRAIN_STONE << 16, 
