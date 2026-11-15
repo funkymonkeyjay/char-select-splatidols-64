@@ -1,5 +1,5 @@
 local VERSION_REQUIRED = 41
-local HAS_CHAR_SELECT = _G.charSelectExists
+local HAS_CHAR_SELECT = charSelectExists
 if VERSION_NUMBER < VERSION_REQUIRED then return end
 
 -- ** LOADING CONDITIONS **
@@ -153,7 +153,7 @@ hook_event(HOOK_ON_SEQ_LOAD, function (p, seq)
 	local m, n = gMarioStates[0], gNetworkPlayers[0]
 	local modelId
 	if HAS_CHAR_SELECT then
-		modelId = _G.charSelect.character_get_current_number(0)
+		modelId = charSelect.character_get_current_number(0)
 		if (splatIdolsOnlyIdolsCond and not (modelId == callieCharID or modelId == marieCharID or modelId == pearlCharID or modelId == marinaCharID or modelId == shiverCharID or modelId == fryeCharID or modelId == bigmanCharID)) then return end
 	end
 
@@ -199,7 +199,7 @@ hook_event(HOOK_ON_SEQ_LOAD, function (p, seq)
 				return
 			end
 			
-			local betterCoinsCheck = _G.betterCoins and ((m.flags & MARIO_WING_CAP) ~= 0 and (m.flags & MARIO_VANISH_CAP) ~= 0 and (m.flags & MARIO_METAL_CAP) ~= 0) -- "Better Coins" compatibility for giggles!
+			local betterCoinsCheck = betterCoins and ((m.flags & MARIO_WING_CAP) ~= 0 and (m.flags & MARIO_VANISH_CAP) ~= 0 and (m.flags & MARIO_METAL_CAP) ~= 0) -- "Better Coins" compatibility for giggles!
 			if (cusMusIndex == 1 and n.currLevelNum == LEVEL_BOWSER_3) -- Play "Calamari Inkantation 64MIX" only during Final Bowser.
 			or ((cusMusIndex == 2 or cusMusIndex == 3) and (m.action & ACT_FLAG_INTANGIBLE) == 0) -- Play "Onward!" only during star dance.
 			or (cusMusIndex == 6 and obj_get_first_with_behavior_id(id_bhvActSelector)) -- Play "Star Select" only during... Star Select!
@@ -222,7 +222,7 @@ hook_event(HOOK_UPDATE, function () -- function meant to handle custom streamed 
 	musicList[SEQ_EVENT_CUTSCENE_COLLECT_STAR] = splatIdolsOldStarCond and 3 or 2 -- Sets "Star Collect" theme.
 	
 	if HAS_CHAR_SELECT then
-		local modelId = _G.charSelect.character_get_current_number(0)
+		local modelId = charSelect.character_get_current_number(0)
 		local idolID = ((modelId == shiverCharID or modelId == fryeCharID or modelId == bigmanCharID) and 4) or ((modelId == pearlCharID or modelId == marinaCharID) and 2) or 0 -- Sets Power-Up theme.
 		musicList[SEQ_EVENT_POWERUP] = 8 + idolID
 		musicList[SEQ_EVENT_METAL_CAP] = 9 + idolID
@@ -237,7 +237,7 @@ hook_event(HOOK_UPDATE, function () -- function meant to handle custom streamed 
 	local fadeMusicCond = (cusMusIndex == 1 and nearestBowser and nearestBowser.oHealth <= 0) or (cusMusIndex > 7 and m.capTimer <= 60) or false
 	
 	if not fadeMusicCond then
-		if (HAS_CHAR_SELECT and _G.charSelect.is_menu_open()) or is_game_paused() then -- Is [CS] menu open or is the game paused?
+		if (HAS_CHAR_SELECT and charSelect.is_menu_open()) or is_game_paused() then -- Is [CS] menu open or is the game paused?
 			audio_stream_pause(currMusic)
 			if cusMusPausePos == 0 then
 				cusMusPausePos = audio_stream_get_position(currMusic) -- Have to "pause" this way because normal pausing just restarts the song for some reason.
@@ -272,7 +272,7 @@ end)
 hook_event(HOOK_ON_DIALOG, function(id)
 	local charCheck = true
 	if HAS_CHAR_SELECT then
-		local modelId = _G.charSelect.character_get_current_number(0)
+		local modelId = charSelect.character_get_current_number(0)
 		if splatIdolsOnlyIdolsCond then
 			charCheck = modelId == callieCharID or modelId == marieCharID or modelId == pearlCharID or modelId == marinaCharID or modelId == shiverCharID or modelId == fryeCharID or modelId == bigmanCharID
 		end
@@ -290,7 +290,7 @@ hook_behavior(id_bhvBowser, OBJ_LIST_GENACTOR, false, nil, function (o)
 	local playerCount = network_player_connected_count() -- Preventive measure to avoid desyncing issues in multiplayer.
 	local charCheck = true
 	if HAS_CHAR_SELECT then
-		local modelId = _G.charSelect.character_get_current_number(0)
+		local modelId = charSelect.character_get_current_number(0)
 		charCheck = modelId == callieCharID or modelId == marieCharID or modelId == pearlCharID or modelId == marinaCharID or modelId == shiverCharID or modelId == fryeCharID or modelId == bigmanCharID
 	end
 	

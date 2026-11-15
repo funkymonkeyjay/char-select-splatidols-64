@@ -4,41 +4,42 @@
 
 -- ** SMALLFRY [WIDDLEPETS] **
 
-if _G.wpets then
+if wpets then
 	local E_MODEL_SMALLFRY = smlua_model_util_get_id('smallfry_geo')
+	local E_MODEL_SMALLFRY_RAIDER = smlua_model_util_get_id('smallfry_raider_geo')
 
-	local smallFryPetID = _G.wpets.add_pet({
+	local smallFryPetID = wpets.add_pet({
 		name = "Smallfry Salmonid", credit = "@funkymonkeyjay",
 		description = "Rarely do young Salmonid turn up lost and hungry... Do you think it likes mushrooms?",
 		modelID = E_MODEL_SMALLFRY,
 		scale = 0.775, yOffset = 0, flying = false
 	})
 
-	_G.wpets.set_pet_anims(smallFryPetID, {
+	wpets.set_pet_anims(smallFryPetID, {
 		idle = 'SMALLFRY_IDLE',
 		follow = 'SMALLFRY_FOLLOW',
 		petted = 'SMALLFRY_PET',
 		dance = 'SMALLFRY_DANCE'
 	})
 
-	_G.wpets.set_pet_sounds(smallFryPetID, {
+	wpets.set_pet_sounds(smallFryPetID, {
 		spawn = 'SMALLFRY_SPAWN.ogg',
 		happy = 'SMALLFRY_HAPPY.ogg',
 		vanish = 'SMALLFRY_VANISH.ogg',
 		step = SOUND_OBJ2_SCUTTLEBUG_WALK
 	})
 	
-	-- Alternate Hairstyles!
-	for i = 1, 6 do
-		_G.wpets.add_pet_alt(smallFryPetID, E_MODEL_SMALLFRY) -- Done to avoid having to add similar models.
+	-- Alternate Hairstyles + Spiralhite Smallfry!
+	for i = 1, 8 do
+		wpets.add_pet_alt(smallFryPetID, i >= 7 and E_MODEL_SMALLFRY_RAIDER or E_MODEL_SMALLFRY)
 	end
 	
-	function splatIdolSmallfryHair_JJJ(node, matStackIndex) -- Made to optimize Smallfry's model.
+	function splatIdolSmallfryHair_JJJ(node, matStackIndex)
 		local switchCase = cast_graph_node(node)
 		local o = geo_get_current_object()
 		if not (switchCase or o) then return end
-		local _, altID = _G.wpets.get_obj_pet_id(o)
-		switchCase.selectedCase = altID
+		local _, altID = wpets.get_obj_pet_id(o)
+		switchCase.selectedCase = altID - switchCase.parameter
 	end
 end
 
@@ -109,7 +110,7 @@ function splatIdolTentacle_JJJ(node, matStackIndex)
 	local forceY = -math.clamp(velY, -1, 1)
 	
 	-- For special cases like "Character Select Nuzlocke".
-	local modelId = _G.charSelect.character_get_current_number(idx)
+	local modelId = charSelect.character_get_current_number(idx)
 	local objCheck = not (modelId == callieCharID or modelId == marieCharID or modelId == pearlCharID or modelId == marinaCharID or modelId == shiverCharID or modelId == fryeCharID or modelId == bigmanCharID)
 	
 	if objCheck then
@@ -193,7 +194,7 @@ function splatIdolTail_JJJ(node, matStackIndex) -- For Big Man
 	
 	-- For special cases like "Character Select Nuzlocke".
 	local idx = m.playerIndex
-	local modelId = _G.charSelect.character_get_current_number(idx)
+	local modelId = charSelect.character_get_current_number(idx)
 	if not (modelId == callieCharID or modelId == marieCharID or modelId == pearlCharID or modelId == marinaCharID or modelId == shiverCharID or modelId == fryeCharID or modelId == bigmanCharID) then
 		buttRot.x, buttRot.y, buttRot.z = 0, 0, 0
 		toLerpLateral = 0
@@ -221,7 +222,7 @@ function splatIdolSwim_JJJ(node, matStackIndex)
 	if not (switchCase or m) then return end
 	
 	local idx = m.playerIndex
-	local modelId = _G.charSelect.character_get_current_number(idx)
+	local modelId = charSelect.character_get_current_number(idx)
 	if not (modelId == callieCharID or modelId == marieCharID or modelId == pearlCharID or modelId == marinaCharID or modelId == shiverCharID or modelId == fryeCharID or modelId == bigmanCharID) then switchCase.selectedCase = 0; return end
 	
 	local currAnim = m.marioObj.header.gfx.animInfo.animID
@@ -253,7 +254,7 @@ end
 
 -- ** INITIALIZATION **
 
-if _G.charSelectExists then
+if charSelectExists then
 	local SPLATIDOLS_TOKID_SOUND =       audio_sample_load("TOKID.ogg")
 	local SPLATIDOLS_TOSQUID_SOUND =     audio_sample_load("TOSQUID.ogg")
 	local SPLATIDOLS_SUPERJUMP_SOUND =   audio_sample_load("SUPERJUMP.ogg")
@@ -264,7 +265,7 @@ if _G.charSelectExists then
 	local SPLATIDOLS_STEP_BIGMAN_SOUND = {audio_sample_load("STEP_BIGMAN_1.ogg"), audio_sample_load("STEP_BIGMAN_2.ogg")}
 	
 	function play_splatidols_sound(snd, pos, vol)
-		if is_game_paused() or _G.charSelect.is_menu_open() then return end
+		if is_game_paused() or charSelect.is_menu_open() then return end
 		return audio_sample_play(snd, pos, vol or 1)
 	end
 
@@ -336,16 +337,16 @@ if _G.charSelectExists then
 
 	hook_event(HOOK_BEFORE_SET_MARIO_ACTION, function (m, incomingAction, actionArg)
 		local idx = m.playerIndex
-		local modelId = _G.charSelect.character_get_current_number(idx)
+		local modelId = charSelect.character_get_current_number(idx)
 		local currAnim = m.marioObj.header.gfx.animInfo.animID
 		
 		if (modelId == callieCharID or modelId == marieCharID or modelId == pearlCharID or modelId == marinaCharID or modelId == shiverCharID or modelId == fryeCharID or modelId == bigmanCharID) then
 			
 			-- For Hypno-Callie, meant to randomize the glasses animation
-			if not _G.charSelect.is_menu_open() then gPlayerSyncTable[m.playerIndex].splatIdolGlassesState_JJJ = math.floor(random_float() * 2.99) end
+			if not charSelect.is_menu_open() then gPlayerSyncTable[m.playerIndex].splatIdolGlassesState_JJJ = math.floor(random_float() * 2.99) end
 			
 			-- Sunshine Dive!
-			local restrictedMoves = _G.charSelect.are_movesets_restricted() or _G.charSelect.get_options_status(_G.charSelect.optionTableRef.localMoveset) == 0
+			local restrictedMoves = charSelect.are_movesets_restricted() or charSelect.get_options_status(charSelect.optionTableRef.localMoveset) == 0
 			if not restrictedMoves and incomingAction == ACT_FORWARD_ROLLOUT and m.action == ACT_DIVE_SLIDE and (m.input & INPUT_A_PRESSED) == 0 and find_floor_slope(m, 0) < 5000 then
 				local forwardVel = m.forwardVel + 15
 				if forwardVel > 48 then
@@ -381,7 +382,7 @@ if _G.charSelectExists then
 	hook_event(HOOK_ON_PLAY_SOUND, function (soundBits, pos)
 		for i = 0, MAX_PLAYERS - 1 do
 			local m = gMarioStates[i]
-			local modelId = _G.charSelect.character_get_current_number(m.playerIndex)
+			local modelId = charSelect.character_get_current_number(m.playerIndex)
 			local charCond = modelId == callieCharID or modelId == marieCharID or modelId == pearlCharID or modelId == marinaCharID or modelId == shiverCharID or modelId == fryeCharID or modelId == bigmanCharID
 			local checkPos = pos.x == m.marioObj.header.gfx.cameraToObject.x and pos.y == m.marioObj.header.gfx.cameraToObject.y and pos.z == m.marioObj.header.gfx.cameraToObject.z -- Shoutouts to "EmilyEmmi" for giving me advice on how to accomplish step sounds!
 
@@ -425,10 +426,10 @@ if _G.charSelectExists then
 
 	hook_event(HOOK_BEFORE_MARIO_UPDATE, function (m) -- Uses one animation for idle, original code by "Baconator2558", edited to fit modifications.
 		local idx = m.playerIndex
-		local modelId = _G.charSelect.character_get_current_number(idx)
+		local modelId = charSelect.character_get_current_number(idx)
 		gPlayerSyncTable[idx].splatIdolOldAnim_JJJ = m.marioObj.header.gfx.animInfo.animID
 		if (modelId == callieCharID or modelId == marieCharID or modelId == pearlCharID or modelId == marinaCharID or modelId == shiverCharID or modelId == fryeCharID or modelId == bigmanCharID) then
-			local restrictedMoves = _G.charSelect.are_movesets_restricted() or _G.charSelect.get_options_status(_G.charSelect.optionTableRef.localMoveset) == 0
+			local restrictedMoves = charSelect.are_movesets_restricted() or charSelect.get_options_status(charSelect.optionTableRef.localMoveset) == 0
 			if not restrictedMoves and (m.action == ACT_PUNCHING or m.action == ACT_MOVE_PUNCHING) then
 				if m.actionArg == 6 then
 					m.actionArg = 0
@@ -457,7 +458,7 @@ if _G.charSelectExists then
 	local hasZoomed = false
 	hook_event(HOOK_MARIO_UPDATE, function (m)
 		local idx = m.playerIndex
-		local modelId = _G.charSelect.character_get_current_number(idx)
+		local modelId = charSelect.character_get_current_number(idx)
 		local currAnim = m.marioObj.header.gfx.animInfo.animID
 		local oldAnim = gPlayerSyncTable[idx].splatIdolOldAnim_JJJ
 		
@@ -593,7 +594,7 @@ if _G.charSelectExists then
     end)
 	
 	-- Preventing any probably cases of weird tentacle/tail stuff when switching chracters.
-	_G.charSelect.hook_on_character_change(function (currChar, prevChar)
+	charSelect.hook_on_character_change(function (currChar, prevChar)
 		local m = gMarioStates[0]
 		for i = 1, 3 do
 			gPlayerSyncTable[m.playerIndex].splatIdolTentacle_JJJ[i].y = 0
@@ -619,38 +620,38 @@ if _G.charSelectExists then
 		metalWing = smlua_model_util_get_id("callie_cap_metal_wing_geo"),
 	}
 	local CALLIE_DESC = "\"Hey there! I'm Callie from the Squid Sisters!...It's another great day, so let's give it our best! Yeah!\" - Voice clips originally preformed by \"keity.pop\" - Character by Nintendo."
-	callieCharID = _G.charSelect.character_add("Callie", CALLIE_DESC, "@funkymonkeyjay", "FF00A0", E_MODEL_CALLIE, CT_MARIO, TEX_CALLIE, 1.075)
-	_G.charSelect.character_add_voice(E_MODEL_CALLIE, splatIdolAnims_JJJ[1].voice)
-	_G.charSelect.character_add_caps(E_MODEL_CALLIE, CAPTABLE_CALLIE)
-	_G.charSelect.character_add_palette_preset(E_MODEL_CALLIE, CALLIE_PALETTE)
-	_G.charSelect.character_add_animations(E_MODEL_CALLIE, splatIdolAnims_JJJ[1].anims, splatIdolAnims_JJJ[1].eyeState, splatIdolAnims_JJJ[1].hands)
-	_G.charSelect.character_set_category(callieCharID, CATEGORY_NAME, true)
+	callieCharID = charSelect.character_add("Callie", CALLIE_DESC, "@funkymonkeyjay", "FF00A0", E_MODEL_CALLIE, CT_MARIO, TEX_CALLIE, 1.075)
+	charSelect.character_add_voice(E_MODEL_CALLIE, splatIdolAnims_JJJ[1].voice)
+	charSelect.character_add_caps(E_MODEL_CALLIE, CAPTABLE_CALLIE)
+	charSelect.character_add_palette_preset(E_MODEL_CALLIE, CALLIE_PALETTE)
+	charSelect.character_add_animations(E_MODEL_CALLIE, splatIdolAnims_JJJ[1].anims, splatIdolAnims_JJJ[1].eyeState, splatIdolAnims_JJJ[1].hands)
+	charSelect.character_set_category(callieCharID, CATEGORY_NAME, true)
 	
 	if not retroCharAPI then -- Kinda redundant to have costumes when the sprites don't even change except for their colors, don't you think?
 		-- Callie (Costume - Casual)
 		local E_MODEL_CALLIE_CASUAL = smlua_model_util_get_id("callie_casual_geo")
 		local CALLIE_CASUAL_PALETTE = {[PANTS] = "000000", [SHIRT] = "ffffff", [GLOVES] = "FF3F6C", [SHOES] = "721C0E", [HAIR] = "210021", [SKIN] = "FFB88A", [EMBLEM] = "FFCF00", [CAP] = "FF00A0"}
-		callieCasualCostumeID = _G.charSelect.character_add_costume(callieCharID, "Callie (Agent 1)", CALLIE_DESC, CREATOR, "FF00A0", E_MODEL_CALLIE_CASUAL, CT_MARIO, TEX_CALLIE, 1.075)
-		_G.charSelect.character_add_voice(E_MODEL_CALLIE_CASUAL, splatIdolAnims_JJJ[1].voice)
-		_G.charSelect.character_add_palette_preset(E_MODEL_CALLIE_CASUAL, CALLIE_CASUAL_PALETTE)
-		_G.charSelect.character_add_animations(E_MODEL_CALLIE_CASUAL, splatIdolAnims_JJJ[1].anims, splatIdolAnims_JJJ[1].eyeState, splatIdolAnims_JJJ[1].hands)
-		_G.charSelect.character_add_caps(E_MODEL_CALLIE_CASUAL, CAPTABLE_CALLIE)
+		callieCasualCostumeID = charSelect.character_add_costume(callieCharID, "Callie (Agent 1)", CALLIE_DESC, CREATOR, "FF00A0", E_MODEL_CALLIE_CASUAL, CT_MARIO, TEX_CALLIE, 1.075)
+		charSelect.character_add_voice(E_MODEL_CALLIE_CASUAL, splatIdolAnims_JJJ[1].voice)
+		charSelect.character_add_palette_preset(E_MODEL_CALLIE_CASUAL, CALLIE_CASUAL_PALETTE)
+		charSelect.character_add_animations(E_MODEL_CALLIE_CASUAL, splatIdolAnims_JJJ[1].anims, splatIdolAnims_JJJ[1].eyeState, splatIdolAnims_JJJ[1].hands)
+		charSelect.character_add_caps(E_MODEL_CALLIE_CASUAL, CAPTABLE_CALLIE)
 		
 		-- Callie (Costume - Hypno)
 		local E_MODEL_CALLIE_HYPNO = smlua_model_util_get_id("callie_hypno_geo")
 		local CALLIE_HYPNO_PALETTE = {[PANTS] = "FF00A0", [SHIRT] = "18121D", [GLOVES] = "18121D", [SHOES] = "18121D", [HAIR] = "210021", [SKIN] = "FFB88A", [EMBLEM] = "FF00A0", [CAP] = "FF00A0"}
-		callieHypnoCostumeID = _G.charSelect.character_add_costume(callieCharID, "Callie (Hypno)", CALLIE_DESC, CREATOR, "FF00A0", E_MODEL_CALLIE_HYPNO, CT_MARIO, TEX_CALLIE, 1.075)
-		_G.charSelect.character_add_voice(E_MODEL_CALLIE_HYPNO, splatIdolAnims_JJJ[1].voice)
-		_G.charSelect.character_add_palette_preset(E_MODEL_CALLIE_HYPNO, CALLIE_HYPNO_PALETTE)
-		_G.charSelect.character_add_animations(E_MODEL_CALLIE_HYPNO, splatIdolAnims_JJJ[1].anims, splatIdolAnims_JJJ[1].eyeState, splatIdolAnims_JJJ[1].hands)
-		_G.charSelect.character_add_caps(E_MODEL_CALLIE_HYPNO, CAPTABLE_CALLIE)
+		callieHypnoCostumeID = charSelect.character_add_costume(callieCharID, "Callie (Hypno)", CALLIE_DESC, CREATOR, "FF00A0", E_MODEL_CALLIE_HYPNO, CT_MARIO, TEX_CALLIE, 1.075)
+		charSelect.character_add_voice(E_MODEL_CALLIE_HYPNO, splatIdolAnims_JJJ[1].voice)
+		charSelect.character_add_palette_preset(E_MODEL_CALLIE_HYPNO, CALLIE_HYPNO_PALETTE)
+		charSelect.character_add_animations(E_MODEL_CALLIE_HYPNO, splatIdolAnims_JJJ[1].anims, splatIdolAnims_JJJ[1].eyeState, splatIdolAnims_JJJ[1].hands)
+		charSelect.character_add_caps(E_MODEL_CALLIE_HYPNO, CAPTABLE_CALLIE)
 	end
 	
 	local CALLIE_RETRO_PALETTE = {[PANTS] = "B4217B", [SHIRT] = "B4217B", [GLOVES] = "B4217B", [SHOES] = "000000", [HAIR] = "000000", [SKIN] = "FFCDC4", [EMBLEM] = "B4217B", [CAP] = "B4217B"}
-	_G.charSelect.character_add_palette_preset(E_MODEL_CALLIE, CALLIE_RETRO_PALETTE, RETRO_NAME)
+	charSelect.character_add_palette_preset(E_MODEL_CALLIE, CALLIE_RETRO_PALETTE, RETRO_NAME)
 	
-	_G.charSelect.character_add_menu_instrumental(callieCharID, audio_stream_load("abc_menu_callie.ogg"))
-	_G.charSelect.character_add_graffiti(callieCharID, TEX_GRAFFITI_CALLIE)
+	charSelect.character_add_menu_instrumental(callieCharID, audio_stream_load("abc_menu_callie.ogg"))
+	charSelect.character_add_graffiti(callieCharID, TEX_GRAFFITI_CALLIE)
 	
 	-- Marie
 	local TEX_MARIE = get_texture_info("marie-icon")
@@ -664,29 +665,29 @@ if _G.charSelectExists then
 		metalWing = smlua_model_util_get_id("marie_cap_metal_wing_geo"),
 	}
 	local MARIE_DESC = "\"Hey. I'm Marie of the Squid Sisters. I know you're probably a bit starstruck, but I need you to get over it.\" - Voice clips originally preformed by \"Mari Kikuma\" - Character by Nintendo."
-	marieCharID = _G.charSelect.character_add("Marie", MARIE_DESC, CREATOR, "50FF00", E_MODEL_MARIE, CT_MARIO, TEX_MARIE, 1.115)
-	_G.charSelect.character_add_voice(E_MODEL_MARIE, splatIdolAnims_JJJ[2].voice)
-	_G.charSelect.character_add_caps(E_MODEL_MARIE, CAPTABLE_MARIE)
-	_G.charSelect.character_add_palette_preset(E_MODEL_MARIE, MARIE_PALETTE)
-	_G.charSelect.character_add_animations(E_MODEL_MARIE, splatIdolAnims_JJJ[2].anims, splatIdolAnims_JJJ[2].eyeState, splatIdolAnims_JJJ[2].hands)
-	_G.charSelect.character_set_category(marieCharID, CATEGORY_NAME, true)
+	marieCharID = charSelect.character_add("Marie", MARIE_DESC, CREATOR, "50FF00", E_MODEL_MARIE, CT_MARIO, TEX_MARIE, 1.115)
+	charSelect.character_add_voice(E_MODEL_MARIE, splatIdolAnims_JJJ[2].voice)
+	charSelect.character_add_caps(E_MODEL_MARIE, CAPTABLE_MARIE)
+	charSelect.character_add_palette_preset(E_MODEL_MARIE, MARIE_PALETTE)
+	charSelect.character_add_animations(E_MODEL_MARIE, splatIdolAnims_JJJ[2].anims, splatIdolAnims_JJJ[2].eyeState, splatIdolAnims_JJJ[2].hands)
+	charSelect.character_set_category(marieCharID, CATEGORY_NAME, true)
 	
 	if not retroCharAPI then
 		-- Marie (Costume - Casual)
 		local E_MODEL_MARIE_CASUAL = smlua_model_util_get_id("marie_casual_geo")
 		local MARIE_CASUAL_PALETTE = {[PANTS] = "50FF00", [SHIRT] = "000000", [GLOVES] = "196400", [SHOES] = "000000", [HAIR] = "929992", [SKIN] = "FFBD8A", [EMBLEM] = "FFFFFF", [CAP] = "50FF00"}
-		marieCasualCostumeID = _G.charSelect.character_add_costume(marieCharID, "Marie (Agent 2)", MARIE_DESC, CREATOR, "50FF00", E_MODEL_MARIE_CASUAL, CT_MARIO, TEX_MARIE, 1.075)
-		_G.charSelect.character_add_voice(E_MODEL_MARIE_CASUAL, splatIdolAnims_JJJ[2].voice)
-		_G.charSelect.character_add_palette_preset(E_MODEL_MARIE_CASUAL, MARIE_CASUAL_PALETTE)
-		_G.charSelect.character_add_animations(E_MODEL_MARIE_CASUAL, splatIdolAnims_JJJ[2].anims, splatIdolAnims_JJJ[2].eyeState, splatIdolAnims_JJJ[2].hands)
-		_G.charSelect.character_add_caps(E_MODEL_MARIE_CASUAL, CAPTABLE_MARIE)
+		marieCasualCostumeID = charSelect.character_add_costume(marieCharID, "Marie (Agent 2)", MARIE_DESC, CREATOR, "50FF00", E_MODEL_MARIE_CASUAL, CT_MARIO, TEX_MARIE, 1.075)
+		charSelect.character_add_voice(E_MODEL_MARIE_CASUAL, splatIdolAnims_JJJ[2].voice)
+		charSelect.character_add_palette_preset(E_MODEL_MARIE_CASUAL, MARIE_CASUAL_PALETTE)
+		charSelect.character_add_animations(E_MODEL_MARIE_CASUAL, splatIdolAnims_JJJ[2].anims, splatIdolAnims_JJJ[2].eyeState, splatIdolAnims_JJJ[2].hands)
+		charSelect.character_add_caps(E_MODEL_MARIE_CASUAL, CAPTABLE_MARIE)
 	end
 	
 	local MARIE_RETRO_PALETTE = {[PANTS] = "0A930C", [SHIRT] = "0A930C", [GLOVES] = "FFFFFF", [SHOES] = "000000", [HAIR] = "FFFFFF", [SKIN] = "E59B26", [EMBLEM] = "0A930C", [CAP] = "0A930C"}
-	_G.charSelect.character_add_palette_preset(E_MODEL_MARIE, MARIE_RETRO_PALETTE, RETRO_NAME)
+	charSelect.character_add_palette_preset(E_MODEL_MARIE, MARIE_RETRO_PALETTE, RETRO_NAME)
 	
-	_G.charSelect.character_add_menu_instrumental(marieCharID, audio_stream_load("abc_menu_marie.ogg"))
-	_G.charSelect.character_add_graffiti(marieCharID, TEX_GRAFFITI_MARIE)
+	charSelect.character_add_menu_instrumental(marieCharID, audio_stream_load("abc_menu_marie.ogg"))
+	charSelect.character_add_graffiti(marieCharID, TEX_GRAFFITI_MARIE)
 	
 	-- Pearl
 	local TEX_PEARL = get_texture_info("pearl-icon")
@@ -700,29 +701,29 @@ if _G.charSelectExists then
 		metalWing = smlua_model_util_get_id("pearl_cap_metal_wing_geo"),
 	}
 	local PEARL_DESC = "\"AYO! One two, one two! It's ya girl Pearl from Off the Hook!\" - Voice clips originally preformed by \"Rina Itou\" - Character by Nintendo."
-	pearlCharID = _G.charSelect.character_add("Pearl", PEARL_DESC, CREATOR, "FF70B9", E_MODEL_PEARL, CT_MARIO, TEX_PEARL, 0.975)
-	_G.charSelect.character_add_voice(E_MODEL_PEARL, splatIdolAnims_JJJ[3].voice)
-	_G.charSelect.character_add_caps(E_MODEL_PEARL, CAPTABLE_PEARL)
-	_G.charSelect.character_add_palette_preset(E_MODEL_PEARL, PEARL_PALETTE)
-	_G.charSelect.character_add_animations(E_MODEL_PEARL, splatIdolAnims_JJJ[3].anims, splatIdolAnims_JJJ[3].eyeState, splatIdolAnims_JJJ[3].hands)
-	_G.charSelect.character_set_category(pearlCharID, CATEGORY_NAME)
+	pearlCharID = charSelect.character_add("Pearl", PEARL_DESC, CREATOR, "FF70B9", E_MODEL_PEARL, CT_MARIO, TEX_PEARL, 0.975)
+	charSelect.character_add_voice(E_MODEL_PEARL, splatIdolAnims_JJJ[3].voice)
+	charSelect.character_add_caps(E_MODEL_PEARL, CAPTABLE_PEARL)
+	charSelect.character_add_palette_preset(E_MODEL_PEARL, PEARL_PALETTE)
+	charSelect.character_add_animations(E_MODEL_PEARL, splatIdolAnims_JJJ[3].anims, splatIdolAnims_JJJ[3].eyeState, splatIdolAnims_JJJ[3].hands)
+	charSelect.character_set_category(pearlCharID, CATEGORY_NAME)
 	
 	if not retroCharAPI then
 		-- Pearl (Costume - Octo)
 		local E_MODEL_PEARL_OCTO = smlua_model_util_get_id("pearl_octo_geo")
 		local PEARL_OCTO_PALETTE = {[PANTS] = "FFFFFF", [SHIRT] = "FF70B9", [GLOVES] = "DEFA8F", [SHOES] = "B3BCBC", [HAIR] = "E5BF7E", [SKIN] = "FFC89B", [EMBLEM] = "FF70B9", [CAP] = "FFFFFF"}
-		pearlOctoCostumeID = _G.charSelect.character_add_costume(pearlCharID, "Pearl (Octo)", PEARL_DESC, CREATOR, "FF70B9", E_MODEL_PEARL_OCTO, CT_MARIO, TEX_PEARL, 1.025)
-		_G.charSelect.character_add_voice(E_MODEL_PEARL_OCTO, splatIdolAnims_JJJ[3].voice)
-		_G.charSelect.character_add_palette_preset(E_MODEL_PEARL_OCTO, PEARL_OCTO_PALETTE)
-		_G.charSelect.character_add_animations(E_MODEL_PEARL_OCTO, splatIdolAnims_JJJ[3].anims, splatIdolAnims_JJJ[3].eyeState, splatIdolAnims_JJJ[3].hands)
-		_G.charSelect.character_add_caps(E_MODEL_PEARL_OCTO, CAPTABLE_PEARL)
+		pearlOctoCostumeID = charSelect.character_add_costume(pearlCharID, "Pearl (Octo)", PEARL_DESC, CREATOR, "FF70B9", E_MODEL_PEARL_OCTO, CT_MARIO, TEX_PEARL, 1.025)
+		charSelect.character_add_voice(E_MODEL_PEARL_OCTO, splatIdolAnims_JJJ[3].voice)
+		charSelect.character_add_palette_preset(E_MODEL_PEARL_OCTO, PEARL_OCTO_PALETTE)
+		charSelect.character_add_animations(E_MODEL_PEARL_OCTO, splatIdolAnims_JJJ[3].anims, splatIdolAnims_JJJ[3].eyeState, splatIdolAnims_JJJ[3].hands)
+		charSelect.character_add_caps(E_MODEL_PEARL_OCTO, CAPTABLE_PEARL)
 	end
 	
 	local PEARL_RETRO_PALETTE = {[PANTS] = "FE6BCD", [SHIRT] = "FFFFFF", [GLOVES] = "FE6BCD", [SHOES] = "FFFFFF", [HAIR] = "FFFFFF", [SKIN] = "FFCDC4", [EMBLEM] = "FE6BCD", [CAP] = "FFFFFF"}
-	_G.charSelect.character_add_palette_preset(E_MODEL_PEARL, PEARL_RETRO_PALETTE, RETRO_NAME)
+	charSelect.character_add_palette_preset(E_MODEL_PEARL, PEARL_RETRO_PALETTE, RETRO_NAME)
 	
-	_G.charSelect.character_add_menu_instrumental(pearlCharID, audio_stream_load("abc_menu_pearl.ogg"))
-	_G.charSelect.character_add_graffiti(pearlCharID, TEX_GRAFFITI_PEARL)
+	charSelect.character_add_menu_instrumental(pearlCharID, audio_stream_load("abc_menu_pearl.ogg"))
+	charSelect.character_add_graffiti(pearlCharID, TEX_GRAFFITI_PEARL)
 	
 	-- Marina
 	local TEX_MARINA = get_texture_info("marina-icon")
@@ -736,29 +737,29 @@ if _G.charSelectExists then
 		metalWing = smlua_model_util_get_id("marina_cap_metal_wing_geo"),
 	}
 	local MARINA_DESC = "\"Hey, I'm Marina from Off the Hook! Nice to meet you!\" - Voice clips originally preformed by \"Alice Peralta\" - Character by Nintendo."
-	marinaCharID = _G.charSelect.character_add("Marina", MARINA_DESC, CREATOR, "00FF89", E_MODEL_MARINA, CT_MARIO, TEX_MARINA, 1.175)
-	_G.charSelect.character_add_voice(E_MODEL_MARINA, splatIdolAnims_JJJ[4].voice)
-	_G.charSelect.character_add_caps(E_MODEL_MARINA, CAPTABLE_MARINA)
-	_G.charSelect.character_add_palette_preset(E_MODEL_MARINA, MARINA_PALETTE)
-	_G.charSelect.character_add_animations(E_MODEL_MARINA, splatIdolAnims_JJJ[4].anims, splatIdolAnims_JJJ[4].eyeState, splatIdolAnims_JJJ[4].hands)
-	_G.charSelect.character_set_category(marinaCharID, CATEGORY_NAME)
+	marinaCharID = charSelect.character_add("Marina", MARINA_DESC, CREATOR, "00FF89", E_MODEL_MARINA, CT_MARIO, TEX_MARINA, 1.175)
+	charSelect.character_add_voice(E_MODEL_MARINA, splatIdolAnims_JJJ[4].voice)
+	charSelect.character_add_caps(E_MODEL_MARINA, CAPTABLE_MARINA)
+	charSelect.character_add_palette_preset(E_MODEL_MARINA, MARINA_PALETTE)
+	charSelect.character_add_animations(E_MODEL_MARINA, splatIdolAnims_JJJ[4].anims, splatIdolAnims_JJJ[4].eyeState, splatIdolAnims_JJJ[4].hands)
+	charSelect.character_set_category(marinaCharID, CATEGORY_NAME)
 	
 	if not retroCharAPI then
 		-- Marina (Costume - Octo)
 		local E_MODEL_MARINA_OCTO = smlua_model_util_get_id("marina_octo_geo")
 		local MARINA_OCTO_PALETTE = {[PANTS] = "7CAA90", [SHIRT] = "FFFFFF", [GLOVES] = "898989", [SHOES] = "FFFFFF", [HAIR] = "300000", [SKIN] = "572E0E", [EMBLEM] = "293030", [CAP] = "00FF89"}
-		marinaOctoCostumeID = _G.charSelect.character_add_costume(marinaCharID, "Marina (Octo)", MARINA_DESC, CREATOR, "00FF89", E_MODEL_MARINA_OCTO, CT_MARIO, TEX_MARINA, 1.175)
-		_G.charSelect.character_add_voice(E_MODEL_MARINA_OCTO, splatIdolAnims_JJJ[4].voice)
-		_G.charSelect.character_add_palette_preset(E_MODEL_MARINA_OCTO, MARINA_OCTO_PALETTE)
-		_G.charSelect.character_add_animations(E_MODEL_MARINA_OCTO, splatIdolAnims_JJJ[4].anims, splatIdolAnims_JJJ[4].eyeState, splatIdolAnims_JJJ[4].hands)
-		_G.charSelect.character_add_caps(E_MODEL_MARINA_OCTO, CAPTABLE_MARINA)
+		marinaOctoCostumeID = charSelect.character_add_costume(marinaCharID, "Marina (Octo)", MARINA_DESC, CREATOR, "00FF89", E_MODEL_MARINA_OCTO, CT_MARIO, TEX_MARINA, 1.175)
+		charSelect.character_add_voice(E_MODEL_MARINA_OCTO, splatIdolAnims_JJJ[4].voice)
+		charSelect.character_add_palette_preset(E_MODEL_MARINA_OCTO, MARINA_OCTO_PALETTE)
+		charSelect.character_add_animations(E_MODEL_MARINA_OCTO, splatIdolAnims_JJJ[4].anims, splatIdolAnims_JJJ[4].eyeState, splatIdolAnims_JJJ[4].hands)
+		charSelect.character_add_caps(E_MODEL_MARINA_OCTO, CAPTABLE_MARINA)
 	end
 	
 	local MARINA_RETRO_PALETTE = {[PANTS] = "017A8B", [SHIRT] = "000000", [GLOVES] = "017A8B", [SHOES] = "000000", [HAIR] = "000000", [SKIN] = "9B4903", [EMBLEM] = "000000", [CAP] = "017A8B"}
-	_G.charSelect.character_add_palette_preset(E_MODEL_MARINA, MARINA_RETRO_PALETTE, RETRO_NAME)
+	charSelect.character_add_palette_preset(E_MODEL_MARINA, MARINA_RETRO_PALETTE, RETRO_NAME)
 	
-	_G.charSelect.character_add_menu_instrumental(marinaCharID, audio_stream_load("abc_menu_marina.ogg"))
-	_G.charSelect.character_add_graffiti(marinaCharID, TEX_GRAFFITI_MARINA)
+	charSelect.character_add_menu_instrumental(marinaCharID, audio_stream_load("abc_menu_marina.ogg"))
+	charSelect.character_add_graffiti(marinaCharID, TEX_GRAFFITI_MARINA)
 	
 	-- Shiver
 	local TEX_SHIVER = get_texture_info("shiver-icon")
@@ -772,30 +773,30 @@ if _G.charSelectExists then
 		metalWing = smlua_model_util_get_id("shiver_cap_metal_wing_geo"),
 	}
 	local SHIVER_DESC = "\"You think you're cool? Sharks call ME cold-blooded. But you can call me Shiver!...Surely you know me from Deep Cut, the freshest pop sensation in the Splatlands.\" - Voice clips originally preformed by \"Anna Sato\" - Character by Nintendo."
-	shiverCharID = _G.charSelect.character_add("Shiver", SHIVER_DESC, CREATOR, "3F3FFF", E_MODEL_SHIVER, CT_MARIO, TEX_SHIVER)
-	_G.charSelect.character_add_voice(E_MODEL_SHIVER, splatIdolAnims_JJJ[5].voice)
-	_G.charSelect.character_add_caps(E_MODEL_SHIVER, CAPTABLE_SHIVER)
-	_G.charSelect.character_add_palette_preset(E_MODEL_SHIVER, SHIVER_PALETTE)
+	shiverCharID = charSelect.character_add("Shiver", SHIVER_DESC, CREATOR, "3F3FFF", E_MODEL_SHIVER, CT_MARIO, TEX_SHIVER)
+	charSelect.character_add_voice(E_MODEL_SHIVER, splatIdolAnims_JJJ[5].voice)
+	charSelect.character_add_caps(E_MODEL_SHIVER, CAPTABLE_SHIVER)
+	charSelect.character_add_palette_preset(E_MODEL_SHIVER, SHIVER_PALETTE)
 	
-	_G.charSelect.character_add_animations(E_MODEL_SHIVER, splatIdolAnims_JJJ[5].anims, splatIdolAnims_JJJ[5].eyeState, splatIdolAnims_JJJ[5].hands)
-	_G.charSelect.character_set_category(shiverCharID, CATEGORY_NAME)
+	charSelect.character_add_animations(E_MODEL_SHIVER, splatIdolAnims_JJJ[5].anims, splatIdolAnims_JJJ[5].eyeState, splatIdolAnims_JJJ[5].hands)
+	charSelect.character_set_category(shiverCharID, CATEGORY_NAME)
 	
 	if not retroCharAPI then
 		-- Shiver (Costume - Raiders)
 		local E_MODEL_SHIVER_RAIDER = smlua_model_util_get_id("shiver_raider_geo")
 		local SHIVER_RAIDER_PALETTE = {[PANTS] = "2C2C4D", [SHIRT] = "27272C", [SHOES] = "FF0000", [HAIR] = "3F3FFF", [SKIN] = "F3BC95", [CAP] = "00FF63", [GLOVES] = "FF0000", [EMBLEM] = "FFFFE1"}
-		shiverRaiderCostumeID = _G.charSelect.character_add_costume(shiverCharID, "Shiver (Raiders)", SHIVER_DESC, CREATOR, "3F3FFF", E_MODEL_SHIVER_RAIDER, CT_MARIO, TEX_SHIVER, 1.1)
-		_G.charSelect.character_add_voice(E_MODEL_SHIVER_RAIDER, splatIdolAnims_JJJ[5].voice)
-		_G.charSelect.character_add_palette_preset(E_MODEL_SHIVER_RAIDER, SHIVER_RAIDER_PALETTE)
-		_G.charSelect.character_add_animations(E_MODEL_SHIVER_RAIDER, splatIdolAnims_JJJ[5].anims, splatIdolAnims_JJJ[5].eyeState, splatIdolAnims_JJJ[5].hands)
-		_G.charSelect.character_add_caps(E_MODEL_SHIVER_RAIDER, CAPTABLE_SHIVER)
+		shiverRaiderCostumeID = charSelect.character_add_costume(shiverCharID, "Shiver (Raiders)", SHIVER_DESC, CREATOR, "3F3FFF", E_MODEL_SHIVER_RAIDER, CT_MARIO, TEX_SHIVER, 1.1)
+		charSelect.character_add_voice(E_MODEL_SHIVER_RAIDER, splatIdolAnims_JJJ[5].voice)
+		charSelect.character_add_palette_preset(E_MODEL_SHIVER_RAIDER, SHIVER_RAIDER_PALETTE)
+		charSelect.character_add_animations(E_MODEL_SHIVER_RAIDER, splatIdolAnims_JJJ[5].anims, splatIdolAnims_JJJ[5].eyeState, splatIdolAnims_JJJ[5].hands)
+		charSelect.character_add_caps(E_MODEL_SHIVER_RAIDER, CAPTABLE_SHIVER)
 	end
 	
 	local SHIVER_RETRO_PALETTE = {[PANTS] = "017A8B", [SHIRT] = "B43021", [SHOES] = "B43021", [HAIR] = "017A8B", [SKIN] = "FFCDC4", [EMBLEM] = "017A8B", [CAP] = "017A8B", [GLOVES] = "B43021"}
-	_G.charSelect.character_add_palette_preset(E_MODEL_SHIVER, SHIVER_RETRO_PALETTE, RETRO_NAME)
+	charSelect.character_add_palette_preset(E_MODEL_SHIVER, SHIVER_RETRO_PALETTE, RETRO_NAME)
 	
-	_G.charSelect.character_add_menu_instrumental(shiverCharID, audio_stream_load("abc_menu_shiver.ogg"))
-	_G.charSelect.character_add_graffiti(shiverCharID, TEX_GRAFFITI_SHIVER)
+	charSelect.character_add_menu_instrumental(shiverCharID, audio_stream_load("abc_menu_shiver.ogg"))
+	charSelect.character_add_graffiti(shiverCharID, TEX_GRAFFITI_SHIVER)
 	
 	-- Frye
 	local TEX_FRYE = get_texture_info("frye-icon")
@@ -809,29 +810,29 @@ if _G.charSelectExists then
 		metalWing = smlua_model_util_get_id("frye_cap_metal_wing_geo"),
 	}
 	local FRYE_DESC = "\"Say it with sizzle...I'm Frye, from Deep Cut, ready for battle! Repping the Splatlands...we drip ink while the suckers lip-synch. Booyah!\" - Voice clips originally preformed by \"Laura Yokozawa\" - Character by Nintendo."
-	fryeCharID = _G.charSelect.character_add("Frye", FRYE_DESC, CREATOR, "FFFF00", E_MODEL_FRYE, CT_MARIO, TEX_FRYE, 1.0375)
-	_G.charSelect.character_add_voice(E_MODEL_FRYE, splatIdolAnims_JJJ[6].voice)
-	_G.charSelect.character_add_caps(E_MODEL_FRYE, CAPTABLE_FRYE)
-	_G.charSelect.character_add_palette_preset(E_MODEL_FRYE, FRYE_PALETTE)
-	_G.charSelect.character_add_animations(E_MODEL_FRYE, splatIdolAnims_JJJ[6].anims, splatIdolAnims_JJJ[6].eyeState, splatIdolAnims_JJJ[6].hands)
-	_G.charSelect.character_set_category(fryeCharID, CATEGORY_NAME)
+	fryeCharID = charSelect.character_add("Frye", FRYE_DESC, CREATOR, "FFFF00", E_MODEL_FRYE, CT_MARIO, TEX_FRYE, 1.0375)
+	charSelect.character_add_voice(E_MODEL_FRYE, splatIdolAnims_JJJ[6].voice)
+	charSelect.character_add_caps(E_MODEL_FRYE, CAPTABLE_FRYE)
+	charSelect.character_add_palette_preset(E_MODEL_FRYE, FRYE_PALETTE)
+	charSelect.character_add_animations(E_MODEL_FRYE, splatIdolAnims_JJJ[6].anims, splatIdolAnims_JJJ[6].eyeState, splatIdolAnims_JJJ[6].hands)
+	charSelect.character_set_category(fryeCharID, CATEGORY_NAME)
 	
 	if not retroCharAPI then
 		-- Frye (Costume - Raiders)
 		local E_MODEL_FRYE_RAIDER = smlua_model_util_get_id("frye_raider_geo")
 		local FRYE_RAIDER_PALETTE = {[PANTS] = "27272C", [SHIRT] = "27272C", [SHOES] = "FFFFFF", [HAIR] = "FFFF00", [SKIN] = "955900", [CAP] = "FFFFFF", [EMBLEM] = "FFFF00", [GLOVES] = "8819FF"}
-		fryeRaiderCostumeID = _G.charSelect.character_add_costume(fryeCharID, "Frye (Raiders)", FRYE_DESC, CREATOR, "FFFF00", E_MODEL_FRYE_RAIDER, CT_MARIO, TEX_FRYE, 1.175)
-		_G.charSelect.character_add_voice(E_MODEL_FRYE_RAIDER, splatIdolAnims_JJJ[6].voice)
-		_G.charSelect.character_add_palette_preset(E_MODEL_FRYE_RAIDER, FRYE_RAIDER_PALETTE)
-		_G.charSelect.character_add_animations(E_MODEL_FRYE_RAIDER, splatIdolAnims_JJJ[6].anims, splatIdolAnims_JJJ[6].eyeState, splatIdolAnims_JJJ[6].hands)
-		_G.charSelect.character_add_caps(E_MODEL_FRYE_RAIDER, CAPTABLE_FRYE)
+		fryeRaiderCostumeID = charSelect.character_add_costume(fryeCharID, "Frye (Raiders)", FRYE_DESC, CREATOR, "FFFF00", E_MODEL_FRYE_RAIDER, CT_MARIO, TEX_FRYE, 1.175)
+		charSelect.character_add_voice(E_MODEL_FRYE_RAIDER, splatIdolAnims_JJJ[6].voice)
+		charSelect.character_add_palette_preset(E_MODEL_FRYE_RAIDER, FRYE_RAIDER_PALETTE)
+		charSelect.character_add_animations(E_MODEL_FRYE_RAIDER, splatIdolAnims_JJJ[6].anims, splatIdolAnims_JJJ[6].eyeState, splatIdolAnims_JJJ[6].hands)
+		charSelect.character_add_caps(E_MODEL_FRYE_RAIDER, CAPTABLE_FRYE)
 	end
 	
 	local FRYE_RETRO_PALETTE = {[PANTS] = "E59B26", [SHIRT] = "E59B26", [SHOES] = "E59B26", [HAIR] = "E59B26", [SKIN] = "9B4903", [CAP] = "9B4903", [EMBLEM] = "E59B26", [GLOVES] = "004149"}
-	_G.charSelect.character_add_palette_preset(E_MODEL_FRYE, FRYE_RETRO_PALETTE, RETRO_NAME)
+	charSelect.character_add_palette_preset(E_MODEL_FRYE, FRYE_RETRO_PALETTE, RETRO_NAME)
 	
-	_G.charSelect.character_add_menu_instrumental(fryeCharID, audio_stream_load("abc_menu_frye.ogg"))
-	_G.charSelect.character_add_graffiti(fryeCharID, TEX_GRAFFITI_FRYE)
+	charSelect.character_add_menu_instrumental(fryeCharID, audio_stream_load("abc_menu_frye.ogg"))
+	charSelect.character_add_graffiti(fryeCharID, TEX_GRAFFITI_FRYE)
 	
 	-- Big Man
 	local TEX_BIGMAN = get_texture_info("bigman-icon")
@@ -845,29 +846,29 @@ if _G.charSelectExists then
 		metalWing = smlua_model_util_get_id("bigman_cap_metal_wing_geo"),
 	}
 	local BIGMAN_DESC = "\"Ay! (Make money! Get fish quick!)...Ay! (Big Man in the house!) Ay. (It's super nice to meet you.)\" - Character by Nintendo."
-	bigmanCharID = _G.charSelect.character_add("Big Man", BIGMAN_DESC, CREATOR, "FF5A5E", E_MODEL_BIGMAN, CT_MARIO, TEX_BIGMAN, 1.4)
-	_G.charSelect.character_add_voice(E_MODEL_BIGMAN, splatIdolAnims_JJJ[7].voice)
-	_G.charSelect.character_add_caps(E_MODEL_BIGMAN, CAPTABLE_BIGMAN)
-	_G.charSelect.character_add_palette_preset(E_MODEL_BIGMAN, BIGMAN_PALETTE)
-	_G.charSelect.character_add_animations(E_MODEL_BIGMAN, splatIdolAnims_JJJ[7].anims, splatIdolAnims_JJJ[7].eyeState, splatIdolAnims_JJJ[7].hands)
-	_G.charSelect.character_set_category(bigmanCharID, CATEGORY_NAME)
+	bigmanCharID = charSelect.character_add("Big Man", BIGMAN_DESC, CREATOR, "FF5A5E", E_MODEL_BIGMAN, CT_MARIO, TEX_BIGMAN, 1.4)
+	charSelect.character_add_voice(E_MODEL_BIGMAN, splatIdolAnims_JJJ[7].voice)
+	charSelect.character_add_caps(E_MODEL_BIGMAN, CAPTABLE_BIGMAN)
+	charSelect.character_add_palette_preset(E_MODEL_BIGMAN, BIGMAN_PALETTE)
+	charSelect.character_add_animations(E_MODEL_BIGMAN, splatIdolAnims_JJJ[7].anims, splatIdolAnims_JJJ[7].eyeState, splatIdolAnims_JJJ[7].hands)
+	charSelect.character_set_category(bigmanCharID, CATEGORY_NAME)
 	
 	if not retroCharAPI then
 		-- Big Man (Costume - Raiders)
 		local E_MODEL_BIGMAN_RAIDER = smlua_model_util_get_id("bigman_raider_geo")
 		local BIGMAN_RAIDER_PALETTE = {[SKIN] = "EDFFED", [PANTS] = "27272C", [SHIRT] = "FF5A5E", [CAP] = "30FFB0", [HAIR] = "FF5A5E", [EMBLEM] = "AC8C8C", [GLOVES] = "EADADA"}
-		bigmanRaiderCostumeID = _G.charSelect.character_add_costume(bigmanCharID, "Big Man (Raiders)", BIGMAN_DESC, CREATOR, "FF5A5E", E_MODEL_BIGMAN_RAIDER, CT_MARIO, TEX_BIGMAN, 1.4)
-		_G.charSelect.character_add_voice(E_MODEL_BIGMAN_RAIDER, splatIdolAnims_JJJ[7].voice)
-		_G.charSelect.character_add_palette_preset(E_MODEL_BIGMAN_RAIDER, BIGMAN_RAIDER_PALETTE)
-		_G.charSelect.character_add_animations(E_MODEL_BIGMAN_RAIDER, splatIdolAnims_JJJ[7].anims, splatIdolAnims_JJJ[7].eyeState, splatIdolAnims_JJJ[7].hands)
-		_G.charSelect.character_add_caps(E_MODEL_BIGMAN_RAIDER, CAPTABLE_BIGMAN)
+		bigmanRaiderCostumeID = charSelect.character_add_costume(bigmanCharID, "Big Man (Raiders)", BIGMAN_DESC, CREATOR, "FF5A5E", E_MODEL_BIGMAN_RAIDER, CT_MARIO, TEX_BIGMAN, 1.4)
+		charSelect.character_add_voice(E_MODEL_BIGMAN_RAIDER, splatIdolAnims_JJJ[7].voice)
+		charSelect.character_add_palette_preset(E_MODEL_BIGMAN_RAIDER, BIGMAN_RAIDER_PALETTE)
+		charSelect.character_add_animations(E_MODEL_BIGMAN_RAIDER, splatIdolAnims_JJJ[7].anims, splatIdolAnims_JJJ[7].eyeState, splatIdolAnims_JJJ[7].hands)
+		charSelect.character_add_caps(E_MODEL_BIGMAN_RAIDER, CAPTABLE_BIGMAN)
 	else
 		local BIGMAN_RETRO_PALETTE = {[SKIN] = "FFFFFF", [CAP] = "B43021", [PANTS] = "ACACAC", [SHIRT] = "B43021", [HAIR] = "B43021", [EMBLEM] = "ACACAC", [GLOVES] = "FFFFFF"}
-		_G.charSelect.character_add_palette_preset(E_MODEL_BIGMAN, BIGMAN_RETRO_PALETTE, RETRO_NAME)
+		charSelect.character_add_palette_preset(E_MODEL_BIGMAN, BIGMAN_RETRO_PALETTE, RETRO_NAME)
 	end
 
-	_G.charSelect.character_add_menu_instrumental(bigmanCharID, audio_stream_load("abc_menu_bigman.ogg"))
-	_G.charSelect.character_add_graffiti(bigmanCharID, TEX_GRAFFITI_BIGMAN)
+	charSelect.character_add_menu_instrumental(bigmanCharID, audio_stream_load("abc_menu_bigman.ogg"))
+	charSelect.character_add_graffiti(bigmanCharID, TEX_GRAFFITI_BIGMAN)
 	
 	-- ** MOUTH/EYEBROW GEO FUNCTIONS **
 	local animIndexes = {
@@ -888,7 +889,7 @@ if _G.charSelectExists then
 		
 		local m = geo_get_mario_state()
 		local idx = m.playerIndex
-		local modelId = _G.charSelect.character_get_current_number(idx)
+		local modelId = charSelect.character_get_current_number(idx)
 
 		local characterAnims = animIndexes[modelId]
 			
@@ -907,7 +908,7 @@ if _G.charSelectExists then
 		
 		local m = geo_get_mario_state()
 		local idx = m.playerIndex
-		local modelId = _G.charSelect.character_get_current_number(idx)
+		local modelId = charSelect.character_get_current_number(idx)
 		
 		local characterAnims = animIndexes[modelId]
 
@@ -995,7 +996,7 @@ if _G.charSelectExists then
 
 	local MATH_DIVIDE_16, MATH_DIVIDE_32, MATH_DIVIDE_64 = 1/16, 1/32, 1/64
 	local function healthRenderFunction(localIndex, health, prevX, prevY, prevScaleX, prevScaleY, x, y, scaleX, scaleY) -- Pretty much almost a copy of the original health meter rendering code by Squishy.
-		local modelId = _G.charSelect.character_get_current_number(localIndex)
+		local modelId = charSelect.character_get_current_number(localIndex)
 		
 		-- Health meter base.
 		local healthPart = health >> 8
@@ -1024,33 +1025,33 @@ if _G.charSelectExists then
 		local currChar = charList[i]
 		for j = 1, #hudIcons do
 			local hudIcon = hudIcons[j]
-			_G.charSelect.character_add_texture_replacement(currChar, hudIcon[1], hudIcon[2])
+			charSelect.character_add_texture_replacement(currChar, hudIcon[1], hudIcon[2])
 		end
 		if currChar == marinaCharID or currChar == shiverCharID then
-			_G.charSelect.character_add_texture_replacement(currChar, "texture_transition_mario", get_texture_info("octopus-trans.ia8"))
+			charSelect.character_add_texture_replacement(currChar, "texture_transition_mario", get_texture_info("octopus-trans.ia8"))
 		else
-			_G.charSelect.character_add_texture_replacement(currChar, "texture_transition_mario", get_texture_info("squid-trans.ia8"))
+			charSelect.character_add_texture_replacement(currChar, "texture_transition_mario", get_texture_info("squid-trans.ia8"))
 		end
-		_G.charSelect.character_add_course_texture(currChar, courseSymbol)
-		_G.charSelect.character_add_health_meter(currChar, healthRenderFunction)
+		charSelect.character_add_course_texture(currChar, courseSymbol)
+		charSelect.character_add_health_meter(currChar, healthRenderFunction)
 	end
 	
 	-- Adding course symbol to costumes, don't know why this has to be done for costumes, but, y'know, eh.
-	_G.charSelect.character_add_costume_course_texture(callieCharID, callieHypnoCostumeID, courseSymbol)
-	_G.charSelect.character_add_costume_course_texture(callieCharID, callieCasualCostumeID, courseSymbol)
-	_G.charSelect.character_add_costume_course_texture(marieCharID, marieCasualCostumeID, courseSymbol)
-	_G.charSelect.character_add_costume_course_texture(pearlCharID, pearlOctoCostumeID, courseSymbol)
-	_G.charSelect.character_add_costume_course_texture(marinaCharID, marinaOctoCostumeID, courseSymbol)
-	_G.charSelect.character_add_costume_course_texture(shiverCharID, shiverRaiderCostumeID, courseSymbol)
-	_G.charSelect.character_add_costume_course_texture(fryeCharID, fryeRaiderCostumeID, courseSymbol)
-	_G.charSelect.character_add_costume_course_texture(bigmanCharID, bigmanRaiderCostumeID, courseSymbol)
+	charSelect.character_add_costume_course_texture(callieCharID, callieHypnoCostumeID, courseSymbol)
+	charSelect.character_add_costume_course_texture(callieCharID, callieCasualCostumeID, courseSymbol)
+	charSelect.character_add_costume_course_texture(marieCharID, marieCasualCostumeID, courseSymbol)
+	charSelect.character_add_costume_course_texture(pearlCharID, pearlOctoCostumeID, courseSymbol)
+	charSelect.character_add_costume_course_texture(marinaCharID, marinaOctoCostumeID, courseSymbol)
+	charSelect.character_add_costume_course_texture(shiverCharID, shiverRaiderCostumeID, courseSymbol)
+	charSelect.character_add_costume_course_texture(fryeCharID, fryeRaiderCostumeID, courseSymbol)
+	charSelect.character_add_costume_course_texture(bigmanCharID, bigmanRaiderCostumeID, courseSymbol)
 	
 	local inkTex = get_texture_info("ink-splatter")
 	hook_event(HOOK_ON_HUD_RENDER_BEHIND, function ()
-		local modelId = _G.charSelect.character_get_current_number(0)
+		local modelId = charSelect.character_get_current_number(0)
 		
 		if not (modelId == callieCharID or modelId == marieCharID or modelId == pearlCharID or modelId == marinaCharID or modelId == shiverCharID or modelId == fryeCharID or modelId == bigmanCharID) then return end
-		if _G.charSelect.get_options_status(_G.charSelect.optionTableRef.localVisuals) == 0 or hud_is_hidden() or (hud_get_value(HUD_DISPLAY_FLAGS) & HUD_DISPLAY_FLAG_LIVES) == 0 or gHudDisplay.flags == HUD_DISPLAY_NONE then return end
+		if charSelect.get_options_status(charSelect.optionTableRef.localVisuals) == 0 or hud_is_hidden() or (hud_get_value(HUD_DISPLAY_FLAGS) & HUD_DISPLAY_FLAG_LIVES) == 0 or gHudDisplay.flags == HUD_DISPLAY_NONE then return end
 		
 		local scale, x, y = djui_hud_get_screen_height() / 240, 22, 15
 		local inkType = (modelId == callieCharID or modelId == marieCharID or modelId == marinaCharID or modelId == bigmanCharID) and CAP or (modelId == pearlCharID and EMBLEM) or HAIR
@@ -1059,14 +1060,15 @@ if _G.charSelectExists then
 		djui_hud_set_color(color.r, color.g, color.b, 255)
 		djui_hud_render_texture(inkTex, (x - 8) * scale, (y - 8) * scale, scale, scale)
 		djui_hud_set_color(255, 255, 255, 255)
-		_G.charSelect.character_render_life_icon(0, x * scale, y * scale, scale)
+		charSelect.character_render_life_icon(0, x * scale, y * scale, scale)
 	end)
 	
 	-- Credits, specific to "[CS] Now or Never Seven"
 	local MOD_NAME = "SplatIdols 64"
-	_G.charSelect.credit_add(MOD_NAME, "VioletSM64", "Idle Trans. Help")
-	_G.charSelect.credit_add(MOD_NAME, "Wasarety", "Raiders Models Ref.")
-	_G.charSelect.credit_add(MOD_NAME, "VentiVR", "Raiders Models Help")
-	_G.charSelect.credit_add(MOD_NAME, "Morishiko", "Swim Form Model Help")
-	_G.charSelect.credit_add(MOD_NAME, "Inkipedia", "Splatoon Assets")
+	charSelect.credit_add(MOD_NAME, "Nintendo", "Splatoon (Franchise)")
+	charSelect.credit_add(MOD_NAME, "VioletSM64", "Idle Trans. Help")
+	charSelect.credit_add(MOD_NAME, "Wasarety", "Raiders Models Ref.")
+	charSelect.credit_add(MOD_NAME, "VentiVR", "Raiders Models Help")
+	charSelect.credit_add(MOD_NAME, "Morishiko", "Swim Form Model Help")
+	charSelect.credit_add(MOD_NAME, "Inkipedia", "Splatoon Assets")
 end

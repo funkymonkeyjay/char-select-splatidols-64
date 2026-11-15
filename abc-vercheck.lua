@@ -10,9 +10,9 @@ if VERSION_NUMBER < VERSION_REQUIRED then
 	incompatibilityCond = true
 end
 
-local csVersion = _G.charSelect and _G.charSelect.version_get_full()
+local csVersion = charSelect and charSelect.version_get_full()
 
-if _G.charSelectExists and csVersion and csVersion.api == 1 and csVersion.major < CS_VERSION_REQUIRED then
+if charSelectExists and csVersion and csVersion.api == 1 and csVersion.major < CS_VERSION_REQUIRED then
 	local verBase = tostring(csVersion.api) .. "." .. tostring(csVersion.major) .. "." .. tostring(csVersion.minor)
 	local verWanted = "1." .. tostring(CS_VERSION_REQUIRED) .. ".0"
 	table.insert(messages, "\n" .. MOD_NAME .. "\nRequires the latest version of \"Character Select\"!\n\nPlease update the Mod\nand Host a new Room!\\#FF7F7F\\\nVersion " .. verBase .. " < " .. verWanted)
