@@ -302,7 +302,8 @@ hook_behavior(id_bhvBowser, OBJ_LIST_GENACTOR, false, nil, function (o)
 		return
 	end
 	
-	local calInkTimer = cusMusic[1].position * 1.9987402854998019983893239002562 -- Props to Coolio for notifying me of the position variable in the ModAudio struct, although I did have to multiply it just to get the exact time in seconds.
+	--local calInkTimer = cusMusic[1].position * 1.9987402854998019983893239002562 -- Props to Coolio for notifying me of the position variable in the ModAudio struct, although I did have to multiply it just to get the exact time in seconds.
+	local calInkTimer = 0 -- Update: It don't work :(
 	
 	if o.oAction == 5 and o.oBehParams2ndByte == 2 then 
 		smlua_anim_util_set_animation(o, "BOWSER_BOP")
