@@ -387,7 +387,7 @@ if charSelectExists then
 			local checkPos = pos.x == m.marioObj.header.gfx.cameraToObject.x and pos.y == m.marioObj.header.gfx.cameraToObject.y and pos.z == m.marioObj.header.gfx.cameraToObject.z -- Shoutouts to "EmilyEmmi" for giving me advice on how to accomplish step sounds!
 
 			if checkPos and charCond then
-				
+				if m.action == ACT_CRAWLING and modelId ~= bigmanCharID then return NO_SOUND end
 				local allowedSoundBits = {
 					SOUND_TERRAIN_DEFAULT << 16, 
 					SOUND_TERRAIN_STONE << 16, 
@@ -398,7 +398,6 @@ if charSelectExists then
 					if m.terrainSoundAddend == allowedSoundBits[i] then allowed = true end
 				end
 				if not allowed then return end
-				if m.action == ACT_CRAWLING and modelId ~= bigmanCharID then return NO_SOUND end
 				if soundBits == SOUND_ACTION_TERRAIN_JUMP or soundBits == SOUND_ACTION_TERRAIN_JUMP + m.terrainSoundAddend then
 					play_splatidols_sound(SPLATIDOLS_HOP_SOUND, m.pos, 1.5)
 					return NO_SOUND
