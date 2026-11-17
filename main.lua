@@ -1067,7 +1067,8 @@ if charSelectExists then
 	charSelect.credit_add(MOD_NAME, "Nintendo", "Splatoon (Franchise)")
 	charSelect.credit_add(MOD_NAME, "VioletSM64", "Idle Trans. Help")
 	charSelect.credit_add(MOD_NAME, "Wasarety", "Raiders Models Ref.")
-	charSelect.credit_add(MOD_NAME, "VentiVR", "Raiders Models Help")
+	charSelect.credit_add(MOD_NAME, "VentiVR", "Raiders Models Help\nRaiders Smallfry Help")
+	charSelect.credit_add(MOD_NAME, "", "")
 	charSelect.credit_add(MOD_NAME, "Morishiko", "Swim Form Model Help")
 	charSelect.credit_add(MOD_NAME, "Inkipedia", "Splatoon Assets")
 end
