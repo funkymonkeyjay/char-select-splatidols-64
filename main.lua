@@ -781,6 +781,9 @@ if charSelectExists then
 	charSelect.character_set_category(shiverCharID, CATEGORY_NAME)
 	
 	if not retroCharAPI then
+		-- Shiver (Costume - Masked)
+		charSelect.character_add_costume(shiverCharID, "Shiver (Masked)", SHIVER_DESC, CREATOR, "3F3FFF", E_MODEL_SHIVER, CT_MARIO, TEX_SHIVER, 1.0675)
+
 		-- Shiver (Costume - Raiders)
 		local E_MODEL_SHIVER_RAIDER = smlua_model_util_get_id("shiver_raider_geo")
 		local SHIVER_RAIDER_PALETTE = {[PANTS] = "2C2C4D", [SHIRT] = "27272C", [SHOES] = "FF0000", [HAIR] = "3F3FFF", [SKIN] = "F3BC95", [CAP] = "00FF63", [GLOVES] = "FF0000", [EMBLEM] = "FFFFE1"}
@@ -817,6 +820,9 @@ if charSelectExists then
 	charSelect.character_set_category(fryeCharID, CATEGORY_NAME)
 	
 	if not retroCharAPI then
+		-- Frye (Costume - Masked)
+		charSelect.character_add_costume(fryeCharID, "Frye (Masked)", FRYE_DESC, CREATOR, "FFFF00", E_MODEL_FRYE, CT_MARIO, TEX_FRYE, 1.0375)
+
 		-- Frye (Costume - Raiders)
 		local E_MODEL_FRYE_RAIDER = smlua_model_util_get_id("frye_raider_geo")
 		local FRYE_RAIDER_PALETTE = {[PANTS] = "27272C", [SHIRT] = "27272C", [SHOES] = "FFFFFF", [HAIR] = "FFFF00", [SKIN] = "955900", [CAP] = "FFFFFF", [EMBLEM] = "FFFF00", [GLOVES] = "8819FF"}
@@ -853,6 +859,9 @@ if charSelectExists then
 	charSelect.character_set_category(bigmanCharID, CATEGORY_NAME)
 	
 	if not retroCharAPI then
+		-- Big Man (Costume - Masked)
+		charSelect.character_add_costume(bigmanCharID, "Big Man (Masked)", BIGMAN_DESC, CREATOR, "FF5A5E", E_MODEL_BIGMAN, CT_MARIO, TEX_BIGMAN, 1.4)
+
 		-- Big Man (Costume - Raiders)
 		local E_MODEL_BIGMAN_RAIDER = smlua_model_util_get_id("bigman_raider_geo")
 		local BIGMAN_RAIDER_PALETTE = {[SKIN] = "EDFFED", [PANTS] = "27272C", [SHIRT] = "FF5A5E", [CAP] = "30FFB0", [HAIR] = "FF5A5E", [EMBLEM] = "AC8C8C", [GLOVES] = "EADADA"}
@@ -879,6 +888,16 @@ if charSelectExists then
 		[fryeCharID] =   splatIdolAnims_JJJ[6], 
 		[bigmanCharID] = splatIdolAnims_JJJ[7], 
 	}
+
+	hook_event(HOOK_MARIO_UPDATE, function(m) if m.playerIndex ~= 0 then return end gPlayerSyncTable[m.playerIndex].splatIdolCurrAlt_JJJ = charSelect.character_get_current_costume(m.playerIndex) end)
+	function splatIdolMask_JJJ(node, matStackIndex) -- For Deep Cut Masks
+		local asSwitchNode = cast_graph_node(node)
+		
+		local m = geo_get_mario_state()
+		local idx = m.playerIndex
+
+		asSwitchNode.selectedCase = gPlayerSyncTable[idx].splatIdolCurrAlt_JJJ == 2 and 1 or 0
+	end
 
 	local function run_func_or_get_var(x, ...) if type(x) == "function" then return x(...) else return x end end
 
